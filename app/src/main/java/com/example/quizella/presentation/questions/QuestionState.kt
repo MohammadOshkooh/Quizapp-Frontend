@@ -44,5 +44,5 @@ data class QuestionState(
     ),
     val isEnabled: Boolean = true,
     val currAns: String = "",
-
+    val correctCount: Int = 0
 )

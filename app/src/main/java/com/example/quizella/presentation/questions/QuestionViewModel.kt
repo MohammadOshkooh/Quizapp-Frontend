@@ -64,10 +64,11 @@ class QuestionViewModel @Inject constructor(
                 if (it.isNotEmpty()) {
                     _currQuestionState.value = currQuestionState.value.copy(
                         questionNo = 1,
-                        currQuestion = it[0]
+                        currQuestion = it[0],
+                        correctCount = 0  // Reset correct count
                     )
                 } else {
-                    // Handle empty list - maybe set a default state or show error
+                    // Handle empty list - set default state
                     _currQuestionState.value = currQuestionState.value.copy(
                         questionNo = 0,
                         currQuestion = null
@@ -99,6 +100,13 @@ class QuestionViewModel @Inject constructor(
                     // Check if the answer is correct
                     val isCorrect = _currQuestionState.value.currQuestion?.correctAnswer == _currQuestionState.value.currAns
 
+                    // Update correct count if answer is correct
+                    if (isCorrect) {
+                        _currQuestionState.value = currQuestionState.value.copy(
+                            correctCount = currQuestionState.value.correctCount + 1
+                        )
+                    }
+
                     // Get current question number (1-based)
                     val currentQNo = _currQuestionState.value.questionNo ?: 0
                     val totalQuestions = _questionsList.value.list.size
@@ -122,7 +130,7 @@ class QuestionViewModel @Inject constructor(
                             }
                         }
                         viewModelScope.launch {
-                            val finalScore = if (isCorrect) currentQNo else currentQNo - 1
+                            val finalScore = _currQuestionState.value.correctCount  // Use correct count
                             _questionsList.value = questionsList.value.copy(
                                 tempPoints = finalScore
                             )
