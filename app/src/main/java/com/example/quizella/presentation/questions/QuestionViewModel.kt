@@ -60,10 +60,19 @@ class QuestionViewModel @Inject constructor(
                 _questionsList.value = questionsList.value.copy(
                     list = it.toMutableList()
                 )
-                _currQuestionState.value = currQuestionState.value.copy(
-                    questionNo = 1,
-                    currQuestion = it[0]
-                )
+                // Check if list is not empty before accessing index 0
+                if (it.isNotEmpty()) {
+                    _currQuestionState.value = currQuestionState.value.copy(
+                        questionNo = 1,
+                        currQuestion = it[0]
+                    )
+                } else {
+                    // Handle empty list - maybe set a default state or show error
+                    _currQuestionState.value = currQuestionState.value.copy(
+                        questionNo = 0,
+                        currQuestion = null
+                    )
+                }
             }
             scoreRepository.getPoints.collect {
                 _questionsList.value = questionsList.value.copy(
@@ -87,50 +96,38 @@ class QuestionViewModel @Inject constructor(
                         isEnabled = false
                     )
                 } else {
-                    if (_currQuestionState.value.currQuestion?.correctAnswer == _currQuestionState.value.currAns) {
+                    // Check if the answer is correct
+                    val isCorrect = _currQuestionState.value.currQuestion?.correctAnswer == _currQuestionState.value.currAns
 
+                    // Get current question number (1-based)
+                    val currentQNo = _currQuestionState.value.questionNo ?: 0
+                    val totalQuestions = _questionsList.value.list.size
+
+                    // Check if there is a next question available
+                    if (currentQNo < totalQuestions) {
+                        // There is a next question, move to it
                         _currQuestionState.value = currQuestionState.value.copy(
-                            questionNo = _currQuestionState.value.questionNo!! + 1,
-                            currQuestion = _questionsList.value.list[_currQuestionState.value.questionNo!!]
+                            questionNo = currentQNo + 1,
+                            currQuestion = _questionsList.value.list[currentQNo]  // index is currentQNo (0-based)
                         )
                         _currQuestionState.value = currQuestionState.value.copy(
                             isEnabled = true,
                             currAns = ""
                         )
-                        if(_currQuestionState.value.questionNo == 21){
-                            event.navHostController.navigate(Screen.FinishScreen.route) {
-                                popUpTo(event.navHostController.graph.findStartDestination().id) {
-                                    inclusive = true
-                                }
-                            }
-                            viewModelScope.launch {
-                                _questionsList.value = questionsList.value.copy(
-                                    tempPoints = _currQuestionState.value.questionNo!! - 1
-                                )
-                                viewModelScope.launch {
-                                    scoreRepository.setTempPoints(_currQuestionState.value.questionNo!! - 1)
-                                    scoreRepository.getTempPoints.collect { temporaryPoints ->
-                                        scoreRepository.getPoints.collect { points ->
-                                            if (points < temporaryPoints) {
-                                                scoreRepository.setPoints(temporaryPoints)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     } else {
+                        // No more questions, navigate to finish screen
                         event.navHostController.navigate(Screen.FinishScreen.route) {
                             popUpTo(event.navHostController.graph.findStartDestination().id) {
                                 inclusive = true
                             }
                         }
                         viewModelScope.launch {
+                            val finalScore = if (isCorrect) currentQNo else currentQNo - 1
                             _questionsList.value = questionsList.value.copy(
-                                tempPoints = _currQuestionState.value.questionNo!! - 1
+                                tempPoints = finalScore
                             )
                             viewModelScope.launch {
-                                scoreRepository.setTempPoints(_currQuestionState.value.questionNo!! - 1)
+                                scoreRepository.setTempPoints(finalScore)
                                 scoreRepository.getTempPoints.collect { temporaryPoints ->
                                     scoreRepository.getPoints.collect { points ->
                                         if (points < temporaryPoints) {
@@ -140,7 +137,6 @@ class QuestionViewModel @Inject constructor(
                                 }
                             }
                         }
-
                     }
                 }
             }
