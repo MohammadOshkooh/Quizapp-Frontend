@@ -101,6 +101,18 @@ class TriviaService(
                 body = request
             }
 
+        } catch (e: RedirectResponseException) {
+
+            Log.e(
+                "TriviaService",
+                "Register redirect error: ${e.response.status.value} ${e.response.status.description}",
+                e
+            )
+
+            throw IllegalStateException(
+                "Registration failed. Please try again."
+            )
+
         } catch (e: ClientRequestException) {
 
             Log.e(
@@ -109,7 +121,12 @@ class TriviaService(
                 e
             )
 
-            throw e
+            throw IllegalStateException(
+                getUserFriendlyError(
+                    statusCode = e.response.status.value,
+                    operation = "register"
+                )
+            )
 
         } catch (e: ServerResponseException) {
 
@@ -119,7 +136,9 @@ class TriviaService(
                 e
             )
 
-            throw e
+            throw IllegalStateException(
+                "Something went wrong on the server. Please try again later."
+            )
 
         } catch (e: Exception) {
 
@@ -129,7 +148,9 @@ class TriviaService(
                 e
             )
 
-            throw e
+            throw IllegalStateException(
+                "Unable to connect to the server. Please check your connection."
+            )
         }
     }
 
@@ -164,6 +185,18 @@ class TriviaService(
                 body = request
             }
 
+        } catch (e: RedirectResponseException) {
+
+            Log.e(
+                "TriviaService",
+                "Login redirect error: ${e.response.status.value} ${e.response.status.description}",
+                e
+            )
+
+            throw IllegalStateException(
+                "Login failed. Please try again."
+            )
+
         } catch (e: ClientRequestException) {
 
             Log.e(
@@ -172,7 +205,12 @@ class TriviaService(
                 e
             )
 
-            throw e
+            throw IllegalStateException(
+                getUserFriendlyError(
+                    statusCode = e.response.status.value,
+                    operation = "login"
+                )
+            )
 
         } catch (e: ServerResponseException) {
 
@@ -182,7 +220,9 @@ class TriviaService(
                 e
             )
 
-            throw e
+            throw IllegalStateException(
+                "Something went wrong on the server. Please try again later."
+            )
 
         } catch (e: Exception) {
 
@@ -192,7 +232,62 @@ class TriviaService(
                 e
             )
 
-            throw e
+            throw IllegalStateException(
+                "Unable to connect to the server. Please check your connection."
+            )
+        }
+    }
+
+    private fun getUserFriendlyError(
+        statusCode: Int,
+        operation: String
+    ): String {
+
+        return when (statusCode) {
+
+            400 -> {
+                "The information you entered is not valid."
+            }
+
+            401 -> {
+                if (operation == "login") {
+                    "Incorrect username or password."
+                } else {
+                    "Authentication failed. Please try again."
+                }
+            }
+
+            403 -> {
+                "You don't have permission to perform this action."
+            }
+
+            404 -> {
+                "Authentication service is unavailable."
+            }
+
+            409 -> {
+                if (operation == "register") {
+                    "This username is already taken."
+                } else {
+                    "This account already exists."
+                }
+            }
+
+            422 -> {
+                "Please check the information you entered."
+            }
+
+            429 -> {
+                "Too many attempts. Please try again later."
+            }
+
+            500, 502, 503, 504 -> {
+                "Something went wrong on the server. Please try again later."
+            }
+
+            else -> {
+                "Something went wrong. Please try again."
+            }
         }
     }
 }
