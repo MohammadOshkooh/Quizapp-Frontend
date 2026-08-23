@@ -39,7 +39,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.runtime.*
@@ -47,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -61,13 +59,10 @@ import com.example.quizella.domain.model.Question
 fun QuestionScreen(
     viewModel: QuestionViewModel = hiltViewModel(),
     navHostController: NavHostController
-
 ) {
     val currQuestion by viewModel.currQuestionState
     val context = LocalContext.current
     val activity = (LocalContext.current as? Activity)
-
-
 
     BackHandler {
         viewModel.onEvent(QuestionEvent.OpenDialog)
@@ -85,9 +80,7 @@ fun QuestionScreen(
             horizontalArrangement = Arrangement.End
         ) {
             IconButton(onClick = {
-
                 viewModel.onEvent(QuestionEvent.OpenDialog)
-
             }) {
                 Icon(
                     imageVector = Icons.Outlined.Logout,
@@ -111,9 +104,7 @@ fun QuestionScreen(
                     ) {
                         Button(
                             onClick = {
-
                                 activity?.finish()
-
                             },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = Color(0xFF243D25)
@@ -128,43 +119,34 @@ fun QuestionScreen(
                 },
                 text = {
                     Text(text = viewModel.dialogState.value.text)
-                })
+                }
+            )
         }
-
 
         Column(
             modifier = Modifier
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (currQuestion.currQuestion?.question != "") {
+            // Get current question safely
+            val currentQuestion = currQuestion.currQuestion
+
+            if (currentQuestion != null && currentQuestion.question.isNotEmpty()) {
                 QuestionCard(
-                    currQuestion.questionNo!!,
-                    Question(
-                        category = currQuestion.currQuestion?.category!!,
-                        id = currQuestion.currQuestion?.id!!,
-                        correctAnswer = currQuestion.currQuestion?.correctAnswer!!,
-                        answers = currQuestion.currQuestion?.answers!!,
-                        tags = currQuestion.currQuestion?.tags!!,
-                        question = currQuestion.currQuestion?.question!!,
-                        type = currQuestion.currQuestion?.type!!,
-                        difficulty = currQuestion.currQuestion?.difficulty!!,
-                        regions = null,
-                        isNiche = currQuestion.currQuestion?.isNiche!!
-                    ),
-                    currQuestion.isEnabled,
-                    currQuestion.currAns,
+                    questionNo = currQuestion.questionNo ?: 1,
+                    question = currentQuestion,
+                    isEnabled = currQuestion.isEnabled,
+                    currAns = currQuestion.currAns,
                     onClick = {
                         viewModel.onEvent(QuestionEvent.ChangeAnswer(it))
-                    })
+                    }
+                )
                 Button(
                     modifier = Modifier.width(150.dp),
                     onClick = {
-                        if (currQuestion.currAns != "") {
+                        if (currQuestion.currAns.isNotEmpty()) {
                             viewModel.onEvent(
-                                QuestionEvent.NextQuestion(
-                                    navHostController,
-                                )
+                                QuestionEvent.NextQuestion(navHostController)
                             )
                         } else {
                             Toast.makeText(
@@ -175,9 +157,7 @@ fun QuestionScreen(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFFAF0171).copy(
-                            0.7f
-                        )
+                        backgroundColor = Color(0xFFAF0171).copy(0.7f)
                     )
                 ) {
                     Text(
@@ -187,9 +167,9 @@ fun QuestionScreen(
                             stringResource(R.string.next)
                         }
                     )
-
                 }
             } else {
+                // Show loading state
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -231,15 +211,14 @@ fun QuestionCard(
             contentPadding = PaddingValues(0.dp, 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
-            items(question.answers) {
+            items(question.answers) { answer ->
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .border(
                             BorderStroke(
-                                if (!isEnabled && (it == question.correctAnswer)) {
+                                if (!isEnabled && (answer == question.correctAnswer)) {
                                     3.dp
                                 } else {
                                     0.dp
@@ -247,15 +226,14 @@ fun QuestionCard(
                             ), RoundedCornerShape(16.dp)
                         )
                         .background(
-                            if (!isEnabled && (it == question.correctAnswer)) {
+                            if (!isEnabled && (answer == question.correctAnswer)) {
                                 Color(0xFF1AC536)
                             } else {
                                 Color(0xFFAF0171)
-
                             }
                         )
                         .clickable(enabled = isEnabled) {
-                            onClick(it)
+                            onClick(answer)
                         }
                         .padding(8.dp),
                     verticalArrangement = Arrangement.Center,
@@ -268,9 +246,9 @@ fun QuestionCard(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = it)
+                        Text(text = answer)
                         RadioButton(
-                            selected = currAns == it,
+                            selected = currAns == answer,
                             onClick = null,
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = if (!isEnabled) {
@@ -284,6 +262,5 @@ fun QuestionCard(
                 }
             }
         }
-
     }
 }

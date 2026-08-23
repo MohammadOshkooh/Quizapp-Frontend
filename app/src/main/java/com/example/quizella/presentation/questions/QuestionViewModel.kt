@@ -73,6 +73,7 @@ class QuestionViewModel @Inject constructor(
                         questionNo = 0,
                         currQuestion = null
                     )
+                    Log.e("QuestionViewModel", "No questions received from API")
                 }
             }
             scoreRepository.getPoints.collect {

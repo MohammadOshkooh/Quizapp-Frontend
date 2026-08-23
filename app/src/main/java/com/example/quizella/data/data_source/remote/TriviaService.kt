@@ -1,63 +1,198 @@
-/**
- *
- *	MIT License
- *
- *	Copyright (c) 2023 Gautam Hazarika
- *
- *	Permission is hereby granted, free of charge, to any person obtaining a copy
- *	of this software and associated documentation files (the "Software"), to deal
- *	in the Software without restriction, including without limitation the rights
- *	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *	copies of the Software, and to permit persons to whom the Software is
- *	furnished to do so, subject to the following conditions:
- *
- *	The above copyright notice and this permission notice shall be included in all
- *	copies or substantial portions of the Software.
- *
- *	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *	SOFTWARE.
- *
- **/
-
 package com.example.quizella.data.data_source.remote
 
 import android.util.Log
 import com.example.quizella.common.Constants
+import com.example.quizella.data.data_source.remote.dto.AuthResponse
+import com.example.quizella.data.data_source.remote.dto.LoginResponse
 import com.example.quizella.data.data_source.remote.dto.QuestionResponse
-import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.request.*
-
+import com.example.quizella.data.data_source.remote.dto.RegisterResponse
+import io.ktor.client.HttpClient
+import io.ktor.client.features.ClientRequestException
+import io.ktor.client.features.RedirectResponseException
+import io.ktor.client.features.ServerResponseException
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.url
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 
 class TriviaService(
     private val client: HttpClient
 ) {
+
     suspend fun getQuestions(): List<QuestionResponse> {
         return try {
-            client.get { url(Constants.base_url) }
-        } catch(e: RedirectResponseException) {
-            // 3xx - responses
-            Log.d("Error", e.response.status.description)
-            emptyList()
-        } catch(e: ClientRequestException) {
-            // 4xx - responses
-            Log.d("Error", e.response.status.description)
+
+            client.get {
+                url(Constants.QUESTIONS_URL)
+            }
+
+        } catch (e: RedirectResponseException) {
+
+            Log.e(
+                "TriviaService",
+                "Redirect: ${e.response.status.description}",
+                e
+            )
 
             emptyList()
-        } catch(e: ServerResponseException) {
-            // 5xx - responses
-            Log.d("Error", e.response.status.description)
+
+        } catch (e: ClientRequestException) {
+
+            Log.e(
+                "TriviaService",
+                "Client error: ${e.response.status.description}",
+                e
+            )
+
             emptyList()
-        } catch(e: Exception) {
-            println("Error: ${e.message}")
+
+        } catch (e: ServerResponseException) {
+
+            Log.e(
+                "TriviaService",
+                "Server error: ${e.response.status.description}",
+                e
+            )
+
+            emptyList()
+
+        } catch (e: Exception) {
+
+            Log.e(
+                "TriviaService",
+                "Error: ${e.message}",
+                e
+            )
+
             emptyList()
         }
     }
 
+    suspend fun register(
+        username: String,
+        password: String
+    ): RegisterResponse {
 
+        val request = AuthResponse(
+            username = username,
+            password = password
+        )
+
+        Log.d(
+            "TriviaService",
+            "Register username: $username"
+        )
+
+        return try {
+
+            client.post {
+
+                url(
+                    Constants.REGISTER_URL
+                )
+
+                header(
+                    HttpHeaders.ContentType,
+                    ContentType.Application.Json
+                )
+
+                body = request
+            }
+
+        } catch (e: ClientRequestException) {
+
+            Log.e(
+                "TriviaService",
+                "Register HTTP error: ${e.response.status.value} ${e.response.status.description}",
+                e
+            )
+
+            throw e
+
+        } catch (e: ServerResponseException) {
+
+            Log.e(
+                "TriviaService",
+                "Register server error: ${e.response.status.value} ${e.response.status.description}",
+                e
+            )
+
+            throw e
+
+        } catch (e: Exception) {
+
+            Log.e(
+                "TriviaService",
+                "Register error: ${e.message}",
+                e
+            )
+
+            throw e
+        }
+    }
+
+    suspend fun login(
+        username: String,
+        password: String
+    ): LoginResponse {
+
+        val request = AuthResponse(
+            username = username,
+            password = password
+        )
+
+        Log.d(
+            "TriviaService",
+            "Login username: $username"
+        )
+
+        return try {
+
+            client.post {
+
+                url(
+                    Constants.LOGIN_URL
+                )
+
+                header(
+                    HttpHeaders.ContentType,
+                    ContentType.Application.Json
+                )
+
+                body = request
+            }
+
+        } catch (e: ClientRequestException) {
+
+            Log.e(
+                "TriviaService",
+                "Login HTTP error: ${e.response.status.value} ${e.response.status.description}",
+                e
+            )
+
+            throw e
+
+        } catch (e: ServerResponseException) {
+
+            Log.e(
+                "TriviaService",
+                "Login server error: ${e.response.status.value} ${e.response.status.description}",
+                e
+            )
+
+            throw e
+
+        } catch (e: Exception) {
+
+            Log.e(
+                "TriviaService",
+                "Login error: ${e.message}",
+                e
+            )
+
+            throw e
+        }
+    }
 }
