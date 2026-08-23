@@ -1,29 +1,3 @@
-/**
- *
- *	MIT License
- *
- *	Copyright (c) 2023 Gautam Hazarika
- *
- *	Permission is hereby granted, free of charge, to any person obtaining a copy
- *	of this software and associated documentation files (the "Software"), to deal
- *	in the Software without restriction, including without limitation the rights
- *	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *	copies of the Software, and to permit persons to whom the Software is
- *	furnished to do so, subject to the following conditions:
- *
- *	The above copyright notice and this permission notice shall be included in all
- *	copies or substantial portions of the Software.
- *
- *	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *	SOFTWARE.
- *
- **/
-
 package com.example.quizella.presentation.questions
 
 import android.annotation.SuppressLint
@@ -34,231 +8,609 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Logout
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.quizella.R
 import com.example.quizella.domain.model.Question
+import com.example.quizella.ui.theme.QuizError
+import com.example.quizella.ui.theme.QuizSuccess
 
 @Composable
 fun QuestionScreen(
-    viewModel: QuestionViewModel = hiltViewModel(),
-    navHostController: NavHostController
+
+    viewModel: QuestionViewModel =
+        hiltViewModel(),
+
+    navHostController:
+    NavHostController
+
 ) {
-    val currQuestion by viewModel.currQuestionState
-    val context = LocalContext.current
-    val activity = (LocalContext.current as? Activity)
+
+    val currQuestion by
+    viewModel.currQuestionState
+
+    val context =
+        LocalContext.current
+
+    val activity =
+        LocalContext.current as? Activity
+
+    val dialogState by
+    viewModel.dialogState
 
     BackHandler {
-        viewModel.onEvent(QuestionEvent.OpenDialog)
+
+        viewModel.onEvent(
+            QuestionEvent.OpenDialog
+        )
     }
 
     Column(
+
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(
+                MaterialTheme.colors.background
+            )
+            .padding(
+                horizontal = 16.dp,
+                vertical = 10.dp
+            ),
+
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            verticalAlignment =
+                Alignment.CenterVertically,
+
+            horizontalArrangement =
+                Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = {
-                viewModel.onEvent(QuestionEvent.OpenDialog)
-            }) {
+
+            Column {
+
+                Text(
+
+                    text =
+                        "Quizella",
+
+                    color =
+                        MaterialTheme.colors.primary,
+
+                    fontWeight =
+                        FontWeight.Bold
+                )
+
+                Text(
+
+                    text =
+                        "Question ${currQuestion.questionNo ?: 1}",
+
+                    style =
+                        MaterialTheme.typography.caption,
+
+                    color =
+                        MaterialTheme.colors.onBackground
+                            .copy(alpha = 0.55f)
+                )
+            }
+
+            IconButton(
+
+                onClick = {
+
+                    viewModel.onEvent(
+                        QuestionEvent.OpenDialog
+                    )
+                }
+
+            ) {
+
                 Icon(
-                    imageVector = Icons.Outlined.Logout,
-                    contentDescription = stringResource(R.string.exit_app)
+
+                    imageVector =
+                        Icons.Outlined.Close,
+
+                    contentDescription =
+                        stringResource(
+                            R.string.exit_app
+                        ),
+
+                    tint =
+                        MaterialTheme.colors.onBackground
                 )
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))
 
-        if (viewModel.dialogState.value.state) {
+        Spacer(
+            modifier =
+                Modifier.height(8.dp)
+        )
+
+        if (
+            dialogState.state
+        ) {
+
             AlertDialog(
+
                 onDismissRequest = {
-                    viewModel.onEvent(QuestionEvent.CloseDialog)
+
+                    viewModel.onEvent(
+                        QuestionEvent.CloseDialog
+                    )
                 },
-                buttons = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            onClick = {
-                                activity?.finish()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Color(0xFF243D25)
-                            )
-                        ) {
-                            Text(
-                                text = "Yes!",
-                                color = Color.White
-                            )
+
+                title = {
+                    Text("Leave quiz?")
+                },
+
+                text = {
+                    Text(
+                        dialogState.text
+                    )
+                },
+
+                confirmButton = {
+
+                    Button(
+
+                        onClick = {
+                            activity?.finish()
                         }
+
+                    ) {
+
+                        Text("Yes")
                     }
                 },
-                text = {
-                    Text(text = viewModel.dialogState.value.text)
+
+                dismissButton = {
+
+                    TextButton(
+
+                        onClick = {
+
+                            viewModel.onEvent(
+                                QuestionEvent.CloseDialog
+                            )
+                        }
+
+                    ) {
+
+                        Text("Stay")
+                    }
                 }
             )
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            // Get current question safely
-            val currentQuestion = currQuestion.currQuestion
+        val currentQuestion =
+            currQuestion.currQuestion
 
-            if (currentQuestion != null && currentQuestion.question.isNotEmpty()) {
-                QuestionCard(
-                    questionNo = currQuestion.questionNo ?: 1,
-                    question = currentQuestion,
-                    isEnabled = currQuestion.isEnabled,
-                    currAns = currQuestion.currAns,
-                    onClick = {
-                        viewModel.onEvent(QuestionEvent.ChangeAnswer(it))
-                    }
-                )
-                Button(
-                    modifier = Modifier.width(150.dp),
-                    onClick = {
-                        if (currQuestion.currAns.isNotEmpty()) {
-                            viewModel.onEvent(
-                                QuestionEvent.NextQuestion(navHostController)
-                            )
-                        } else {
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.please_select_an_answer),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFFAF0171).copy(0.7f)
-                    )
-                ) {
-                    Text(
-                        text = if (currQuestion.isEnabled) {
-                            stringResource(R.string.submit)
-                        } else {
-                            stringResource(R.string.next)
-                        }
+        if (
+
+            currentQuestion != null &&
+
+            currentQuestion.question.isNotEmpty()
+
+        ) {
+
+            QuestionCard(
+
+                questionNo =
+                    currQuestion.questionNo ?: 1,
+
+                question =
+                    currentQuestion,
+
+                isEnabled =
+                    currQuestion.isEnabled,
+
+                currAns =
+                    currQuestion.currAns,
+
+                onClick = {
+
+                    viewModel.onEvent(
+                        QuestionEvent.ChangeAnswer(it)
                     )
                 }
-            } else {
-                // Show loading state
-                Column(
-                    modifier = Modifier
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(8.dp)
+            )
+
+            Button(
+
+                modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .height(450.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(
-                        color = Color.White
-                    )
-                }
+                        .height(52.dp),
+
+                onClick = {
+
+                    if (
+                        currQuestion.currAns.isNotEmpty()
+                    ) {
+
+                        viewModel.onEvent(
+
+                            QuestionEvent.NextQuestion(
+                                navHostController
+                            )
+                        )
+
+                    } else {
+
+                        Toast.makeText(
+
+                            context,
+
+                            context.getString(
+                                R.string.please_select_an_answer
+                            ),
+
+                            Toast.LENGTH_SHORT
+
+                        ).show()
+                    }
+                },
+
+                shape =
+                    MaterialTheme.shapes.medium
+
+            ) {
+
+                Text(
+
+                    text =
+                        if (
+                            currQuestion.isEnabled
+                        ) {
+
+                            stringResource(
+                                R.string.submit
+                            )
+
+                        } else {
+
+                            stringResource(
+                                R.string.next
+                            )
+                        }
+                )
+            }
+
+        } else {
+
+            Column(
+
+                modifier =
+                    Modifier.fillMaxSize(),
+
+                verticalArrangement =
+                    Arrangement.Center,
+
+                horizontalAlignment =
+                    Alignment.CenterHorizontally
+
+            ) {
+
+                CircularProgressIndicator(
+
+                    color =
+                        MaterialTheme.colors.primary
+                )
+
+                Spacer(
+                    modifier =
+                        Modifier.height(12.dp)
+                )
+
+                Text(
+
+                    text =
+                        "Loading question...",
+
+                    color =
+                        MaterialTheme.colors.onBackground
+                            .copy(alpha = 0.6f)
+                )
             }
         }
     }
 }
 
-@SuppressLint("UnrememberedMutableState")
+@SuppressLint(
+    "UnrememberedMutableState"
+)
 @Composable
 fun QuestionCard(
+
     questionNo: Int,
+
     question: Question,
+
     isEnabled: Boolean,
+
     currAns: String,
+
     onClick: (String) -> Unit
+
 ) {
-    Column {
+
+    Column(
+        modifier =
+            Modifier.fillMaxWidth()
+    ) {
+
+        // ==================================================
+        // QUESTION
+        // ==================================================
+
         Column(
+
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFFE80F88).copy(0.75f))
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .clip(
+                    MaterialTheme.shapes.large
+                )
+                .background(
+                    MaterialTheme.colors.surface
+                )
+                .border(
+
+                    BorderStroke(
+
+                        1.dp,
+
+                        MaterialTheme.colors.onSurface
+                            .copy(alpha = 0.08f)
+                    ),
+
+                    MaterialTheme.shapes.large
+                )
+
+                .padding(22.dp)
+
         ) {
-            Text(text = "Q$questionNo. " + question.question, fontSize = 16.sp)
+
+            Text(
+
+                text =
+                    "QUESTION $questionNo",
+
+                style =
+                    MaterialTheme.typography.caption,
+
+                color =
+                    MaterialTheme.colors.primary,
+
+                fontWeight =
+                    FontWeight.Bold
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(10.dp)
+            )
+
+            Text(
+
+                text =
+                    question.question,
+
+                style =
+                    MaterialTheme.typography.h6,
+
+                color =
+                    MaterialTheme.colors.onSurface
+            )
         }
+
         LazyColumn(
-            contentPadding = PaddingValues(0.dp, 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            contentPadding =
+                PaddingValues(
+                    vertical = 16.dp
+                ),
+
+            verticalArrangement =
+                Arrangement.spacedBy(10.dp)
+
         ) {
-            items(question.answers) { answer ->
-                Column(
+
+            items(
+                question.answers
+            ) { answer ->
+
+                val isCorrect =
+                    !isEnabled &&
+                            answer ==
+                            question.correctAnswer
+
+                val isWrongSelection =
+                    !isEnabled &&
+                            currAns == answer &&
+                            answer !=
+                            question.correctAnswer
+
+                val background =
+
+                    when {
+
+                        isCorrect ->
+                            QuizSuccess.copy(
+                                alpha = 0.13f
+                            )
+
+                        isWrongSelection ->
+                            QuizError.copy(
+                                alpha = 0.12f
+                            )
+
+                        currAns == answer &&
+                                isEnabled ->
+
+                            MaterialTheme.colors.primary
+                                .copy(
+                                    alpha = 0.10f
+                                )
+
+                        else ->
+                            MaterialTheme.colors.surface
+                    }
+
+                val borderColor =
+
+                    when {
+
+                        isCorrect ->
+                            QuizSuccess
+
+                        isWrongSelection ->
+                            QuizError
+
+                        currAns == answer &&
+                                isEnabled ->
+
+                            MaterialTheme.colors.primary
+
+                        else ->
+
+                            MaterialTheme.colors.onSurface
+                                .copy(
+                                    alpha = 0.10f
+                                )
+                    }
+
+                Row(
+
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .border(
-                            BorderStroke(
-                                if (!isEnabled && (answer == question.correctAnswer)) {
-                                    3.dp
-                                } else {
-                                    0.dp
-                                }, Color(0xFF058011)
-                            ), RoundedCornerShape(16.dp)
+                        .clip(
+                            RoundedCornerShape(18.dp)
                         )
                         .background(
-                            if (!isEnabled && (answer == question.correctAnswer)) {
-                                Color(0xFF1AC536)
-                            } else {
-                                Color(0xFFAF0171)
-                            }
+                            background
                         )
-                        .clickable(enabled = isEnabled) {
-                            onClick(answer)
-                        }
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp, 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = answer)
-                        RadioButton(
-                            selected = currAns == answer,
-                            onClick = null,
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = if (!isEnabled) {
-                                    Color.Black
-                                } else {
-                                    Color.Cyan
-                                }
+                        .border(
+
+                            BorderStroke(
+                                1.5.dp,
+                                borderColor
+                            ),
+
+                            RoundedCornerShape(
+                                18.dp
                             )
                         )
-                    }
+                        .clickable(
+                            enabled = isEnabled
+                        ) {
+
+                            onClick(answer)
+                        }
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 10.dp
+                        ),
+
+                    verticalAlignment =
+                        Alignment.CenterVertically
+                ) {
+
+                    Text(
+
+                        text =
+                            answer,
+
+                        modifier =
+                            Modifier.weight(1f),
+
+                        color =
+                            MaterialTheme.colors.onSurface,
+
+                        fontSize =
+                            15.sp
+                    )
+
+                    RadioButton(
+
+                        selected =
+                            currAns == answer,
+
+                        onClick =
+                            null,
+
+                        colors =
+                            RadioButtonDefaults.colors(
+
+                                selectedColor =
+
+                                    when {
+
+                                        isCorrect ->
+                                            QuizSuccess
+
+                                        isWrongSelection ->
+                                            QuizError
+
+                                        else ->
+                                            MaterialTheme.colors.primary
+                                    },
+
+                                unselectedColor =
+                                    MaterialTheme.colors.onSurface
+                                        .copy(
+                                            alpha = 0.35f
+                                        )
+                            )
+                    )
                 }
             }
         }

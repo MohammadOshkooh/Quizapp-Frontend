@@ -3,13 +3,8 @@ package com.example.quizella.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,6 +15,7 @@ import com.example.quizella.presentation.auth.RegisterScreen
 import com.example.quizella.presentation.finish.FinishScreen
 import com.example.quizella.presentation.main.MainScreen
 import com.example.quizella.presentation.questions.QuestionScreen
+import com.example.quizella.presentation.theme.ThemeViewModel
 import com.example.quizella.presentation.util.Screen
 import com.example.quizella.ui.theme.QuizellaTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,51 +26,60 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(
         savedInstanceState: Bundle?
     ) {
-
         super.onCreate(savedInstanceState)
 
         setContent {
 
-            QuizellaTheme {
+            val authViewModel: AuthViewModel =
+                hiltViewModel()
 
-                val authViewModel: AuthViewModel =
-                    hiltViewModel()
+            val themeViewModel: ThemeViewModel =
+                hiltViewModel()
 
-                val authState by
-                authViewModel.state.collectAsState()
+            val authState by
+            authViewModel.state.collectAsState()
+
+            val themeMode by
+            themeViewModel.theme.collectAsState()
+
+            QuizellaTheme(
+                themeMode = themeMode
+            ) {
+
+                val navController =
+                    rememberNavController()
 
                 /*
-                 * Do not create the navigation graph until
-                 * DataStore has restored the authentication state.
+                 * Authentication state:
                  *
-                 * null means:
-                 * "we don't know yet whether the user is logged in."
+                 * null  -> DataStore is still restoring the state.
+                 * true  -> User is logged in.
+                 * false -> User is logged out.
+                 *
+                 * We intentionally do NOT create the NavHost while
+                 * the authentication state is null.
+                 *
+                 * This prevents the LoginScreen from flashing for
+                 * a moment when an already logged-in user opens the app.
                  */
-                if (authState.isLoggedIn == null) {
 
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                if (authState.isLoggedIn != null) {
 
-                        CircularProgressIndicator()
-                    }
-
-                } else {
-
-                    val navController =
-                        rememberNavController()
+                    val startDestination =
+                        if (authState.isLoggedIn == true) {
+                            Screen.MainScreen.route
+                        } else {
+                            Screen.LoginScreen.route
+                        }
 
                     NavHost(
                         navController = navController,
-
-                        startDestination =
-                            if (authState.isLoggedIn == true) {
-                                Screen.MainScreen.route
-                            } else {
-                                Screen.LoginScreen.route
-                            }
+                        startDestination = startDestination
                     ) {
+
+                        // ==================================================
+                        // LOGIN
+                        // ==================================================
 
                         composable(
                             Screen.LoginScreen.route
@@ -82,6 +87,7 @@ class MainActivity : ComponentActivity() {
 
                             LoginScreen(
                                 navController = navController,
+
                                 onLoginSuccess = {
 
                                     navController.navigate(
@@ -91,13 +97,18 @@ class MainActivity : ComponentActivity() {
                                         popUpTo(
                                             Screen.LoginScreen.route
                                         ) {
-
                                             inclusive = true
                                         }
+
+                                        launchSingleTop = true
                                     }
                                 }
                             )
                         }
+
+                        // ==================================================
+                        // REGISTER
+                        // ==================================================
 
                         composable(
                             Screen.RegisterScreen.route
@@ -105,6 +116,7 @@ class MainActivity : ComponentActivity() {
 
                             RegisterScreen(
                                 navController = navController,
+
                                 onRegisterSuccess = {
 
                                     navController.navigate(
@@ -114,59 +126,117 @@ class MainActivity : ComponentActivity() {
                                         popUpTo(
                                             Screen.RegisterScreen.route
                                         ) {
-
                                             inclusive = true
                                         }
+
+                                        launchSingleTop = true
                                     }
                                 }
                             )
                         }
+
+                        // ==================================================
+                        // MAIN
+                        // ==================================================
 
                         composable(
                             Screen.MainScreen.route
                         ) {
 
-                            MainScreen(
-                                navHostController =
-                                    navController,
+                            if (authState.isLoggedIn == true) {
 
-                                onLogout = {
+                                MainScreen(
+                                    navHostController =
+                                        navController,
 
-                                    authViewModel.logout()
+                                    onLogout = {
 
-                                    navController.navigate(
-                                        Screen.LoginScreen.route
-                                    ) {
+                                        authViewModel.logout()
 
-                                        popUpTo(
-                                            Screen.MainScreen.route
+                                        navController.navigate(
+                                            Screen.LoginScreen.route
                                         ) {
 
-                                            inclusive = true
+                                            popUpTo(
+                                                Screen.MainScreen.route
+                                            ) {
+                                                inclusive = true
+                                            }
+
+                                            launchSingleTop = true
                                         }
-                                    }
-                                }
-                            )
+                                    },
+
+                                    themeMode = themeMode,
+
+                                    onThemeChange =
+                                        themeViewModel::setTheme
+                                )
+                            }
                         }
+
+                        // ==================================================
+                        // QUESTIONS
+                        // ==================================================
 
                         composable(
                             Screen.QuestionScreen.route
                         ) {
 
-                            QuestionScreen(
-                                navHostController =
-                                    navController
-                            )
+                            if (authState.isLoggedIn == true) {
+
+                                QuestionScreen(
+                                    navHostController =
+                                        navController
+                                )
+
+                            } else {
+
+                                navController.navigate(
+                                    Screen.LoginScreen.route
+                                ) {
+
+                                    popUpTo(
+                                        Screen.QuestionScreen.route
+                                    ) {
+                                        inclusive = true
+                                    }
+
+                                    launchSingleTop = true
+                                }
+                            }
                         }
+
+                        // ==================================================
+                        // FINISH
+                        // ==================================================
 
                         composable(
                             Screen.FinishScreen.route
                         ) {
 
-                            FinishScreen(
-                                navHostController =
-                                    navController
-                            )
+                            if (authState.isLoggedIn == true) {
+
+                                FinishScreen(
+                                    navHostController =
+                                        navController
+                                )
+
+                            } else {
+
+                                navController.navigate(
+                                    Screen.LoginScreen.route
+                                ) {
+
+                                    popUpTo(
+                                        Screen.FinishScreen.route
+                                    ) {
+                                        inclusive = true
+                                    }
+
+                                    launchSingleTop = true
+                                }
+                            }
                         }
                     }
                 }
