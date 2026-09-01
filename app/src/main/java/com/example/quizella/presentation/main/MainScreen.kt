@@ -387,7 +387,7 @@ fun MainScreen(
                         onClick = {
 
                             navHostController.navigate(
-                                Screen.QuestionScreen.route
+                                Screen.QuizSetupScreen.route
                             )
                         },
 

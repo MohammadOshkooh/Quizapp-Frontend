@@ -10,9 +10,11 @@ import com.example.quizella.data.data_source.local.QuestionsCacheDB
 import com.example.quizella.data.data_source.local.UserDao
 import com.example.quizella.data.data_source.remote.TriviaService
 import com.example.quizella.data.repository.AuthRepositoryImpl
+import com.example.quizella.data.repository.CategoryRepositoryImpl
 import com.example.quizella.data.repository.QuestionsRepositoryImpl
 import com.example.quizella.data.repository.ScoreRepositoryImpl
 import com.example.quizella.domain.repository.AuthRepository
+import com.example.quizella.domain.repository.CategoryRepository
 import com.example.quizella.domain.repository.QuestionsRepository
 import com.example.quizella.domain.repository.ScoreRepository
 import dagger.Module
@@ -26,10 +28,7 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
-private val Context.quizellaDataStore: DataStore<Preferences>
-        by preferencesDataStore(
-            name = "quizella_prefs"
-        )
+private val Context.quizellaDataStore: DataStore<Preferences> by preferencesDataStore(name = "quizella_prefs")
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -37,96 +36,63 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(): HttpClient {
-        return HttpClient {
-
-            install(JsonFeature) {
-                serializer = KotlinxSerializer(
-                    Json {
-                        ignoreUnknownKeys = true
-                        isLenient = true
-                        encodeDefaults = true
-                    }
-                )
-            }
+    fun provideHttpClient(): HttpClient = HttpClient {
+        install(JsonFeature) {
+            serializer = KotlinxSerializer(
+                Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                    encodeDefaults = true
+                }
+            )
         }
     }
 
     @Provides
     @Singleton
-    fun provideTriviaService(
-        client: HttpClient
-    ): TriviaService {
-        return TriviaService(client)
-    }
+    fun provideTriviaService(client: HttpClient): TriviaService = TriviaService(client)
 
     @Provides
     @Singleton
-    fun provideDataStore(
-        @ApplicationContext context: Context
-    ): DataStore<Preferences> {
-        return context.quizellaDataStore
-    }
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        context.quizellaDataStore
 
     @Provides
     @Singleton
-    fun provideDatabase(
-        @ApplicationContext context: Context
-    ): QuestionsCacheDB {
-        return Room.databaseBuilder(
-            context,
-            QuestionsCacheDB::class.java,
-            "questions_cache_db"
-        )
+    fun provideDatabase(@ApplicationContext context: Context): QuestionsCacheDB =
+        Room.databaseBuilder(context, QuestionsCacheDB::class.java, "questions_cache_db")
             .fallbackToDestructiveMigration()
             .build()
-    }
 
     @Provides
     @Singleton
-    fun provideQuestionDao(
-        database: QuestionsCacheDB
-    ): QuestionCacheDao {
-        return database.questionDao()
-    }
+    fun provideQuestionDao(database: QuestionsCacheDB): QuestionCacheDao = database.questionDao()
 
     @Provides
     @Singleton
-    fun provideUserDao(
-        database: QuestionsCacheDB
-    ): UserDao {
-        return database.userDao()
-    }
+    fun provideUserDao(database: QuestionsCacheDB): UserDao = database.userDao()
 
     @Provides
     @Singleton
     fun provideQuestionsRepository(
         questionDao: QuestionCacheDao,
         triviaService: TriviaService
-    ): QuestionsRepository {
-        return QuestionsRepositoryImpl(
-            questionDao,
-            triviaService
-        )
-    }
+    ): QuestionsRepository = QuestionsRepositoryImpl(questionDao, triviaService)
 
     @Provides
     @Singleton
-    fun provideScoreRepository(
-        dataStore: DataStore<Preferences>
-    ): ScoreRepository {
-        return ScoreRepositoryImpl(dataStore)
-    }
+    fun provideCategoryRepository(triviaService: TriviaService): CategoryRepository =
+        CategoryRepositoryImpl(triviaService)
+
+    @Provides
+    @Singleton
+    fun provideScoreRepository(dataStore: DataStore<Preferences>): ScoreRepository =
+        ScoreRepositoryImpl(dataStore)
 
     @Provides
     @Singleton
     fun provideAuthRepository(
         triviaService: TriviaService,
         @ApplicationContext context: Context
-    ): AuthRepository {
-        return AuthRepositoryImpl(
-            context = context,
-            triviaService = triviaService
-        )
-    }
+    ): AuthRepository = AuthRepositoryImpl(context = context, triviaService = triviaService)
 }

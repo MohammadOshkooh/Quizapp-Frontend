@@ -1,29 +1,3 @@
-/**
- *
- *	MIT License
- *
- *	Copyright (c) 2023 Gautam Hazarika
- *
- *	Permission is hereby granted, free of charge, to any person obtaining a copy
- *	of this software and associated documentation files (the "Software"), to deal
- *	in the Software without restriction, including without limitation the rights
- *	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *	copies of the Software, and to permit persons to whom the Software is
- *	furnished to do so, subject to the following conditions:
- *
- *	The above copyright notice and this permission notice shall be included in all
- *	copies or substantial portions of the Software.
- *
- *	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *	SOFTWARE.
- *
- **/
-
 package com.example.quizella.data.repository
 
 import com.example.quizella.data.data_source.local.QuestionCacheDao
@@ -37,28 +11,57 @@ class QuestionsRepositoryImpl(
     private val triviaService: TriviaService
 ) : QuestionsRepository {
 
-    override suspend fun getQuestions(): Flow<List<Question>> {
+    override suspend fun getQuestions(
+        category: String,
+        questionTypes: List<String>,
+        limit: Int
+    ): Flow<List<Question>> {
 
-        triviaService.getQuestions().forEach {
+        dao.clear()
+
+        triviaService.getQuestions(
+            category = category,
+            questionTypes = questionTypes,
+            limit = limit
+        ).forEach { question ->
+
             dao.insertQuestion(
                 Question(
-                    id = it.id,
-                    category = it.category,
-                    correctAnswer = it.correctAnswer,
-                    answers = (it.incorrectAnswers + it.correctAnswer).shuffled(),
-                    question = it.question,
-                    tags = it.tags,
-                    type = it.type,
-                    difficulty = it.difficulty,
-                    regions = it.regions,
-                    isNiche = it.isNiche
+                    id = question.id,
+
+                    category = question.category,
+
+                    correctAnswer =
+                        question.correctAnswer,
+
+                    answers = (
+                            question.incorrectAnswers
+                                    + question.correctAnswer
+                            ).shuffled(),
+
+                    question = question.question,
+
+                    tags = question.tags,
+
+                    // Always multiple choice.
+                    type = question.type,
+
+                    // Actual media type.
+                    mediaType = question.mediaType,
+
+                    difficulty = question.difficulty,
+
+                    regions = question.regions,
+
+                    isNiche = question.isNiche,
+
+                    mediaUrl = question.mediaUrl
                 )
             )
-
         }
+
         return dao.getQuestions()
     }
-
 
     override suspend fun clearQuestions() {
         dao.clear()

@@ -3,6 +3,7 @@ package com.example.quizella.data.data_source.remote
 import android.util.Log
 import com.example.quizella.common.Constants
 import com.example.quizella.data.data_source.remote.dto.AuthResponse
+import com.example.quizella.data.data_source.remote.dto.CategoryResponse
 import com.example.quizella.data.data_source.remote.dto.LoginResponse
 import com.example.quizella.data.data_source.remote.dto.QuestionResponse
 import com.example.quizella.data.data_source.remote.dto.RegisterResponse
@@ -12,6 +13,7 @@ import io.ktor.client.features.RedirectResponseException
 import io.ktor.client.features.ServerResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
@@ -21,11 +23,59 @@ class TriviaService(
     private val client: HttpClient
 ) {
 
-    suspend fun getQuestions(): List<QuestionResponse> {
+    suspend fun getCategories(): List<CategoryResponse> {
+        return try {
+            client.get {
+                url(Constants.CATEGORIES_URL)
+            }
+        } catch (e: Exception) {
+            Log.e(
+                "TriviaService",
+                "Category request failed: ${e.message}",
+                e
+            )
+
+            emptyList()
+        }
+    }
+
+    suspend fun getQuestions(
+        category: String,
+        questionTypes: List<String>,
+        limit: Int
+    ): List<QuestionResponse> {
+
         return try {
 
             client.get {
+
                 url(Constants.QUESTIONS_URL)
+
+                parameter(
+                    "limit",
+                    limit
+                )
+
+                parameter(
+                    "category",
+                    category
+                )
+
+                /*
+                 * FastAPI receives these as:
+                 *
+                 * media_types=text
+                 * media_types=audio
+                 *
+                 * for example.
+                 */
+                questionTypes.forEach { questionType ->
+
+                    parameter(
+                        "media_types",
+                        questionType
+                    )
+                }
             }
 
         } catch (e: RedirectResponseException) {
@@ -62,7 +112,7 @@ class TriviaService(
 
             Log.e(
                 "TriviaService",
-                "Error: ${e.message}",
+                "Question request failed: ${e.message}",
                 e
             )
 
@@ -89,9 +139,7 @@ class TriviaService(
 
             client.post {
 
-                url(
-                    Constants.REGISTER_URL
-                )
+                url(Constants.REGISTER_URL)
 
                 header(
                     HttpHeaders.ContentType,
@@ -105,7 +153,7 @@ class TriviaService(
 
             Log.e(
                 "TriviaService",
-                "Register redirect error: ${e.response.status.value} ${e.response.status.description}",
+                "Register redirect error: ${e.response.status.value}",
                 e
             )
 
@@ -117,14 +165,14 @@ class TriviaService(
 
             Log.e(
                 "TriviaService",
-                "Register HTTP error: ${e.response.status.value} ${e.response.status.description}",
+                "Register HTTP error: ${e.response.status.value}",
                 e
             )
 
             throw IllegalStateException(
                 getUserFriendlyError(
-                    statusCode = e.response.status.value,
-                    operation = "register"
+                    e.response.status.value,
+                    "register"
                 )
             )
 
@@ -132,7 +180,7 @@ class TriviaService(
 
             Log.e(
                 "TriviaService",
-                "Register server error: ${e.response.status.value} ${e.response.status.description}",
+                "Register server error: ${e.response.status.value}",
                 e
             )
 
@@ -173,9 +221,7 @@ class TriviaService(
 
             client.post {
 
-                url(
-                    Constants.LOGIN_URL
-                )
+                url(Constants.LOGIN_URL)
 
                 header(
                     HttpHeaders.ContentType,
@@ -189,7 +235,7 @@ class TriviaService(
 
             Log.e(
                 "TriviaService",
-                "Login redirect error: ${e.response.status.value} ${e.response.status.description}",
+                "Login redirect error: ${e.response.status.value}",
                 e
             )
 
@@ -201,14 +247,14 @@ class TriviaService(
 
             Log.e(
                 "TriviaService",
-                "Login HTTP error: ${e.response.status.value} ${e.response.status.description}",
+                "Login HTTP error: ${e.response.status.value}",
                 e
             )
 
             throw IllegalStateException(
                 getUserFriendlyError(
-                    statusCode = e.response.status.value,
-                    operation = "login"
+                    e.response.status.value,
+                    "login"
                 )
             )
 
@@ -216,7 +262,7 @@ class TriviaService(
 
             Log.e(
                 "TriviaService",
-                "Login server error: ${e.response.status.value} ${e.response.status.description}",
+                "Login server error: ${e.response.status.value}",
                 e
             )
 
@@ -245,49 +291,40 @@ class TriviaService(
 
         return when (statusCode) {
 
-            400 -> {
+            400 ->
                 "The information you entered is not valid."
-            }
 
-            401 -> {
+            401 ->
                 if (operation == "login") {
                     "Incorrect username or password."
                 } else {
                     "Authentication failed. Please try again."
                 }
-            }
 
-            403 -> {
+            403 ->
                 "You don't have permission to perform this action."
-            }
 
-            404 -> {
+            404 ->
                 "Authentication service is unavailable."
-            }
 
-            409 -> {
+            409 ->
                 if (operation == "register") {
                     "This username is already taken."
                 } else {
                     "This account already exists."
                 }
-            }
 
-            422 -> {
+            422 ->
                 "Please check the information you entered."
-            }
 
-            429 -> {
+            429 ->
                 "Too many attempts. Please try again later."
-            }
 
-            500, 502, 503, 504 -> {
+            500, 502, 503, 504 ->
                 "Something went wrong on the server. Please try again later."
-            }
 
-            else -> {
+            else ->
                 "Something went wrong. Please try again."
-            }
         }
     }
 }

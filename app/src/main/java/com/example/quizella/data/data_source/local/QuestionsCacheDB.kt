@@ -6,21 +6,19 @@ import androidx.room.TypeConverters
 import com.example.quizella.domain.model.Question
 import com.example.quizella.domain.model.User
 
-/**
- * Main Room Database for the application.
- * Manages both question cache and user authentication tables.
- *
- * @property questionDao Provides access to question-related operations.
- * @property userDao Provides access to user-related operations.
- */
 @Database(
-    entities = [Question::class, User::class],
-    version = 2,
+    entities = [
+        Question::class,
+        User::class
+    ],
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class QuestionsCacheDB : RoomDatabase() {
+
     abstract fun questionDao(): QuestionCacheDao
+
     abstract fun userDao(): UserDao
 
     companion object {
