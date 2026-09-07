@@ -10,6 +10,7 @@ import com.example.quizella.presentation.finish.FinishScreen
 import com.example.quizella.presentation.main.MainScreen
 import com.example.quizella.presentation.questions.QuestionScreen
 import com.example.quizella.presentation.quiz.QuizSetupScreen
+import com.example.quizella.presentation.results.ResultsScreen
 import com.example.quizella.ui.theme.ThemeMode
 
 /**
@@ -53,6 +54,10 @@ fun SetupNavigation(
 
         composable(Screen.FinishScreen.route) {
             FinishScreen(navHostController = navController)
+        }
+
+        composable(Screen.ResultsScreen.route) {
+            ResultsScreen(navHostController = navController)
         }
     }
 }

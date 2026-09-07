@@ -12,10 +12,12 @@ import com.example.quizella.data.data_source.remote.TriviaService
 import com.example.quizella.data.repository.AuthRepositoryImpl
 import com.example.quizella.data.repository.CategoryRepositoryImpl
 import com.example.quizella.data.repository.QuestionsRepositoryImpl
+import com.example.quizella.data.repository.QuizResultRepositoryImpl
 import com.example.quizella.data.repository.ScoreRepositoryImpl
 import com.example.quizella.domain.repository.AuthRepository
 import com.example.quizella.domain.repository.CategoryRepository
 import com.example.quizella.domain.repository.QuestionsRepository
+import com.example.quizella.domain.repository.QuizResultRepository
 import com.example.quizella.domain.repository.ScoreRepository
 import dagger.Module
 import dagger.Provides
@@ -83,6 +85,14 @@ object AppModule {
     @Singleton
     fun provideCategoryRepository(triviaService: TriviaService): CategoryRepository =
         CategoryRepositoryImpl(triviaService)
+
+    @Provides
+    @Singleton
+    fun provideQuizResultRepository(
+        triviaService: TriviaService,
+        authRepository: AuthRepository
+    ): QuizResultRepository =
+        QuizResultRepositoryImpl(triviaService, authRepository)
 
     @Provides
     @Singleton

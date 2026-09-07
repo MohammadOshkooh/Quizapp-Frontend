@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.quizella.domain.repository.QuestionsRepository
+import com.example.quizella.domain.repository.QuizResultRepository
 import com.example.quizella.domain.repository.ScoreRepository
 import com.example.quizella.presentation.util.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class QuestionViewModel @Inject constructor(
     private val questionsRepository: QuestionsRepository,
     private val scoreRepository: ScoreRepository,
+    private val quizResultRepository: QuizResultRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -307,22 +309,37 @@ class QuestionViewModel @Inject constructor(
                                     finalScore
                                 )
                         }
-                    }
 
-                    event.navHostController
-                        .navigate(
-                            Screen.FinishScreen.route
-                        ) {
+                        val saveResult = quizResultRepository.saveQuizResult(
+                            category = category,
+                            questionTypes = questionTypes,
+                            questionCount = totalQuestions,
+                            correctCount = finalScore
+                        )
 
-                            popUpTo(
-                                event.navHostController
-                                    .graph
-                                    .findStartDestination()
-                                    .id
-                            ) {
-                                inclusive = true
-                            }
+                        if (saveResult.isFailure) {
+                            Log.e(
+                                "QuestionViewModel",
+                                "Failed to save quiz result",
+                                saveResult.exceptionOrNull()
+                            )
                         }
+
+                        event.navHostController
+                            .navigate(
+                                Screen.FinishScreen.route
+                            ) {
+
+                                popUpTo(
+                                    event.navHostController
+                                        .graph
+                                        .findStartDestination()
+                                        .id
+                                ) {
+                                    inclusive = true
+                                }
+                            }
+                    }
                 }
             }
 

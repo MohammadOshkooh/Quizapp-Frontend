@@ -422,6 +422,21 @@ fun MainScreen(
                     Modifier.height(18.dp)
             )
 
+            OutlinedButton(
+                onClick = {
+                    navHostController.navigate(Screen.ResultsScreen.route)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Quiz History")
+            }
+
+            Spacer(
+                modifier =
+                    Modifier.height(10.dp)
+            )
+
             // ==================================================
             // THEME BUTTON
             // ==================================================

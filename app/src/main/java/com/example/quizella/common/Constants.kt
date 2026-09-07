@@ -6,4 +6,5 @@ object Constants {
     const val CATEGORIES_URL = "$API_BASE_URL/api/categories/"
     const val REGISTER_URL = "$API_BASE_URL/api/auth/register"
     const val LOGIN_URL = "$API_BASE_URL/api/auth/login"
+    const val RESULTS_URL = "$API_BASE_URL/api/results/"
 }

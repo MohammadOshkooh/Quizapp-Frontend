@@ -18,6 +18,7 @@ import com.example.quizella.presentation.finish.FinishScreen
 import com.example.quizella.presentation.main.MainScreen
 import com.example.quizella.presentation.questions.QuestionScreen
 import com.example.quizella.presentation.quiz.QuizSetupScreen
+import com.example.quizella.presentation.results.ResultsScreen
 import com.example.quizella.presentation.theme.ThemeViewModel
 import com.example.quizella.presentation.util.Screen
 import com.example.quizella.ui.theme.QuizellaTheme
@@ -120,6 +121,17 @@ class MainActivity : ComponentActivity() {
                             } else {
                                 navController.navigate(Screen.LoginScreen.route) {
                                     popUpTo(Screen.FinishScreen.route) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        }
+
+                        composable(Screen.ResultsScreen.route) {
+                            if (authState.isLoggedIn == true) {
+                                ResultsScreen(navHostController = navController)
+                            } else {
+                                navController.navigate(Screen.LoginScreen.route) {
+                                    popUpTo(Screen.ResultsScreen.route) { inclusive = true }
                                     launchSingleTop = true
                                 }
                             }

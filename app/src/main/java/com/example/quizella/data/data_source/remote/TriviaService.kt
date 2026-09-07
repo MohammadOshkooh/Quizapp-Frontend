@@ -7,6 +7,8 @@ import com.example.quizella.data.data_source.remote.dto.CategoryResponse
 import com.example.quizella.data.data_source.remote.dto.LoginResponse
 import com.example.quizella.data.data_source.remote.dto.QuestionResponse
 import com.example.quizella.data.data_source.remote.dto.RegisterResponse
+import com.example.quizella.data.data_source.remote.dto.QuizResultRequest
+import com.example.quizella.data.data_source.remote.dto.QuizResultResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.features.ClientRequestException
 import io.ktor.client.features.RedirectResponseException
@@ -117,6 +119,27 @@ class TriviaService(
             )
 
             emptyList()
+        }
+    }
+
+    suspend fun saveQuizResult(
+        token: String,
+        request: QuizResultRequest
+    ): QuizResultResponse {
+        return client.post {
+            url(Constants.RESULTS_URL)
+            header(HttpHeaders.Authorization, "Bearer $token")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            body = request
+        }
+    }
+
+    suspend fun getQuizResults(
+        token: String
+    ): List<QuizResultResponse> {
+        return client.get {
+            url(Constants.RESULTS_URL)
+            header(HttpHeaders.Authorization, "Bearer $token")
         }
     }
 

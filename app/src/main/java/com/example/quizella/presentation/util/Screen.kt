@@ -12,4 +12,5 @@ sealed class Screen(val route: String) {
             "question_screen?category=$category&type=$type&count=$count"
     }
     object FinishScreen : Screen("finish_screen")
+    object ResultsScreen : Screen("results_screen")
 }
