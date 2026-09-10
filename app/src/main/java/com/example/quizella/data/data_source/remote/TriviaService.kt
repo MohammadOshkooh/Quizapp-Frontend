@@ -2,6 +2,8 @@ package com.example.quizella.data.data_source.remote
 
 import android.util.Log
 import com.example.quizella.common.Constants
+import com.example.quizella.data.data_source.remote.dto.AnswerRequest
+import com.example.quizella.data.data_source.remote.dto.AnswerResponse
 import com.example.quizella.data.data_source.remote.dto.AuthResponse
 import com.example.quizella.data.data_source.remote.dto.CategoryResponse
 import com.example.quizella.data.data_source.remote.dto.LoginResponse
@@ -42,6 +44,7 @@ class TriviaService(
     }
 
     suspend fun getQuestions(
+        token: String,
         category: String,
         questionTypes: List<String>,
         limit: Int
@@ -52,6 +55,11 @@ class TriviaService(
             client.get {
 
                 url(Constants.QUESTIONS_URL)
+
+                header(
+                    HttpHeaders.Authorization,
+                    "Bearer $token"
+                )
 
                 parameter(
                     "limit",
@@ -122,14 +130,50 @@ class TriviaService(
         }
     }
 
+    suspend fun answerQuestion(
+        token: String,
+        questionId: Int,
+        selectedAnswer: String,
+        quizToken: String
+    ): AnswerResponse {
+        return client.post {
+            url(Constants.ANSWER_URL)
+
+            header(
+                HttpHeaders.Authorization,
+                "Bearer $token"
+            )
+
+            header(
+                HttpHeaders.ContentType,
+                ContentType.Application.Json
+            )
+
+            body = AnswerRequest(
+                question_id = questionId,
+                selected_answer = selectedAnswer,
+                quiz_token = quizToken
+            )
+        }
+    }
+
     suspend fun saveQuizResult(
         token: String,
         request: QuizResultRequest
     ): QuizResultResponse {
         return client.post {
             url(Constants.RESULTS_URL)
-            header(HttpHeaders.Authorization, "Bearer $token")
-            header(HttpHeaders.ContentType, ContentType.Application.Json)
+
+            header(
+                HttpHeaders.Authorization,
+                "Bearer $token"
+            )
+
+            header(
+                HttpHeaders.ContentType,
+                ContentType.Application.Json
+            )
+
             body = request
         }
     }
@@ -139,7 +183,11 @@ class TriviaService(
     ): List<QuizResultResponse> {
         return client.get {
             url(Constants.RESULTS_URL)
-            header(HttpHeaders.Authorization, "Bearer $token")
+
+            header(
+                HttpHeaders.Authorization,
+                "Bearer $token"
+            )
         }
     }
 

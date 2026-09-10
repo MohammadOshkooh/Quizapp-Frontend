@@ -11,5 +11,11 @@ interface QuestionsRepository {
         limit: Int
     ): Flow<List<Question>>
 
+    suspend fun submitAnswer(
+        questionId: Int,
+        selectedAnswer: String,
+        quizToken: String
+    ): Result<Pair<String, Int>>
+
     suspend fun clearQuestions()
 }

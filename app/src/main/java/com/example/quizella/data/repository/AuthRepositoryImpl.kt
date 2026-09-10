@@ -25,14 +25,23 @@ class AuthRepositoryImpl @Inject constructor(
 
     companion object {
 
+        private const val ACCESS_TOKEN =
+            "access_token"
+
         private val IS_LOGGED_IN =
-            booleanPreferencesKey("is_logged_in")
+            booleanPreferencesKey(
+                "is_logged_in"
+            )
 
         private val USERNAME =
-            stringPreferencesKey("username")
+            stringPreferencesKey(
+                "username"
+            )
 
-        private val ACCESS_TOKEN =
-            stringPreferencesKey("access_token")
+        private val TOKEN =
+            stringPreferencesKey(
+                ACCESS_TOKEN
+            )
     }
 
     override suspend fun register(
@@ -42,10 +51,11 @@ class AuthRepositoryImpl @Inject constructor(
 
         return try {
 
-            val response = triviaService.register(
-                username = username,
-                password = password
-            )
+            val response =
+                triviaService.register(
+                    username = username,
+                    password = password
+                )
 
             val user = User(
                 id = response.id,
@@ -68,10 +78,11 @@ class AuthRepositoryImpl @Inject constructor(
 
         return try {
 
-            val response = triviaService.login(
-                username = username,
-                password = password
-            )
+            val response =
+                triviaService.login(
+                    username = username,
+                    password = password
+                )
 
             saveLoginState(
                 isLoggedIn = true,
@@ -101,43 +112,57 @@ class AuthRepositoryImpl @Inject constructor(
 
         context.dataStore.edit { prefs ->
 
-            prefs[IS_LOGGED_IN] = isLoggedIn
+            prefs[IS_LOGGED_IN] =
+                isLoggedIn
 
             if (isLoggedIn) {
 
-                prefs[USERNAME] = username
+                prefs[USERNAME] =
+                    username
 
                 if (accessToken.isNotEmpty()) {
-                    prefs[ACCESS_TOKEN] = accessToken
+
+                    prefs[TOKEN] =
+                        accessToken
                 }
 
             } else {
 
-                prefs.remove(USERNAME)
-                prefs.remove(ACCESS_TOKEN)
+                prefs.remove(
+                    USERNAME
+                )
+
+                prefs.remove(
+                    TOKEN
+                )
             }
         }
     }
 
-    override fun getLoginState(): Flow<Pair<Boolean, String>> {
+    override fun getLoginState():
+            Flow<Pair<Boolean, String>> {
 
-        return context.dataStore.data.map { prefs ->
+        return context.dataStore
+            .data
+            .map { prefs ->
 
-            val isLoggedIn =
-                prefs[IS_LOGGED_IN] ?: false
+                val isLoggedIn =
+                    prefs[IS_LOGGED_IN] ?: false
 
-            val username =
-                prefs[USERNAME] ?: ""
+                val username =
+                    prefs[USERNAME] ?: ""
 
-            isLoggedIn to username
-        }
+                isLoggedIn to username
+            }
     }
 
-    override suspend fun getAccessToken(): String? {
+    override suspend fun getAccessToken():
+            String? {
 
-        return context.dataStore.data
+        return context.dataStore
+            .data
             .map { prefs ->
-                prefs[ACCESS_TOKEN]
+                prefs[TOKEN]
             }
             .first()
     }

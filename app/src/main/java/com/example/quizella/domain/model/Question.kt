@@ -14,6 +14,8 @@ data class Question(
 
     val answers: List<String>,
 
+    val quizToken: String,
+
     val tags: List<String>,
 
     val question: String,

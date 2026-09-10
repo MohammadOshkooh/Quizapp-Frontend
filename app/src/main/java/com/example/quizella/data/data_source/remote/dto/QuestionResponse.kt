@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 data class QuestionResponse(
     val category: String,
     val id: String,
-    val correctAnswer: String,
-    val incorrectAnswers: List<String>,
+    val answers: List<String>,
+    val quizToken: String,
     val tags: List<String> = emptyList(),
     val question: String,
 

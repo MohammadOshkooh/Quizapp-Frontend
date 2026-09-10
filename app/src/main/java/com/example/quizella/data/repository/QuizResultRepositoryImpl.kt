@@ -13,39 +13,59 @@ class QuizResultRepositoryImpl @Inject constructor(
 ) : QuizResultRepository {
 
     override suspend fun saveQuizResult(
-        category: String,
-        questionTypes: List<String>,
-        questionCount: Int,
-        correctCount: Int
+        quizToken: String,
+        historyIds: List<Int>
     ): Result<QuizResult> {
         return try {
+
             val token = authRepository.getAccessToken()
-                ?: return Result.failure(IllegalStateException("Authentication token is missing."))
+                ?: return Result.failure(
+                    IllegalStateException(
+                        "Authentication token is missing."
+                    )
+                )
 
             val response = triviaService.saveQuizResult(
                 token = token,
                 request = QuizResultRequest(
-                    category = category,
-                    question_types = questionTypes,
-                    question_count = questionCount,
-                    correct_count = correctCount
+                    quiz_token = quizToken,
+                    history_ids = historyIds
                 )
             )
 
-            Result.success(response.toDomain())
+            Result.success(
+                response.toDomain()
+            )
+
         } catch (e: Exception) {
+
             Result.failure(e)
         }
     }
 
-    override suspend fun getQuizResults(): Result<List<QuizResult>> {
-        return try {
-            val token = authRepository.getAccessToken()
-                ?: return Result.failure(IllegalStateException("Authentication token is missing."))
+    override suspend fun getQuizResults():
+            Result<List<QuizResult>> {
 
-            val response = triviaService.getQuizResults(token)
-            Result.success(response.map { it.toDomain() })
+        return try {
+
+            val token = authRepository.getAccessToken()
+                ?: return Result.failure(
+                    IllegalStateException(
+                        "Authentication token is missing."
+                    )
+                )
+
+            val response =
+                triviaService.getQuizResults(token)
+
+            Result.success(
+                response.map {
+                    it.toDomain()
+                }
+            )
+
         } catch (e: Exception) {
+
             Result.failure(e)
         }
     }

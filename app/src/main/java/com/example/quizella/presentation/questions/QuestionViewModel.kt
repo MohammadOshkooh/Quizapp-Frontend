@@ -43,7 +43,8 @@ class QuestionViewModel @Inject constructor(
      */
     private val questionTypes: List<String> =
         (
-                savedStateHandle.get<String>("type")
+                savedStateHandle
+                    .get<String>("type")
                     ?: "text"
                 )
             .split(",")
@@ -66,15 +67,20 @@ class QuestionViewModel @Inject constructor(
         savedStateHandle
             .get<String>("count")
             ?.toIntOrNull()
-            ?: savedStateHandle.get<Int>("count")
+            ?: savedStateHandle
+                .get<Int>("count")
             ?: 10
+
+    private val answeredHistoryIds =
+        mutableListOf<Int>()
 
     private val _currQuestionState =
         mutableStateOf(
             QuestionState()
         )
 
-    val currQuestionState: State<QuestionState> =
+    val currQuestionState:
+            State<QuestionState> =
         _currQuestionState
 
     private val _questionsList =
@@ -82,7 +88,8 @@ class QuestionViewModel @Inject constructor(
             QuestionListState()
         )
 
-    val questionsList: State<QuestionListState> =
+    val questionsList:
+            State<QuestionListState> =
         _questionsList
 
     private val _dialogState =
@@ -90,7 +97,8 @@ class QuestionViewModel @Inject constructor(
             DialogState()
         )
 
-    val dialogState: State<DialogState> =
+    val dialogState:
+            State<DialogState> =
         _dialogState
 
     init {
@@ -136,7 +144,8 @@ class QuestionViewModel @Inject constructor(
                 questionsRepository
                     .getQuestions(
                         category = category,
-                        questionTypes = questionTypes,
+                        questionTypes =
+                            questionTypes,
                         limit = count
                     )
                     .collect { questions ->
@@ -210,7 +219,8 @@ class QuestionViewModel @Inject constructor(
             is QuestionEvent.NextQuestion -> {
 
                 /*
-                 * First click = submit current answer.
+                 * First click = submit the answer to the backend.
+                 * The server is the only authority for correctness.
                  */
                 if (
                     _currQuestionState
@@ -221,23 +231,95 @@ class QuestionViewModel @Inject constructor(
                     val current =
                         _currQuestionState.value
 
-                    val isCorrect =
+                    val question =
                         current.currQuestion
-                            ?.correctAnswer == current.currAns
 
-                    val updatedCorrectCount =
-                        if (isCorrect) {
-                            current.correctCount + 1
-                        } else {
-                            current.correctCount
-                        }
+                    if (question == null) {
+                        return
+                    }
 
-                    _currQuestionState.value =
-                        current.copy(
-                            isEnabled = false,
-                            correctCount =
-                                updatedCorrectCount
+                    viewModelScope.launch {
+
+                        val result =
+                            questionsRepository
+                                .submitAnswer(
+                                    questionId =
+                                        question.id
+                                            .toIntOrNull()
+                                            ?: return@launch,
+
+                                    selectedAnswer =
+                                        current.currAns,
+
+                                    quizToken =
+                                        question.quizToken
+                                )
+
+                        result.fold(
+
+                            onSuccess = {
+                                    answerResult ->
+
+                                val (
+                                    correctAnswer,
+                                    historyId
+                                ) = answerResult
+
+                                val isCorrect =
+                                    current.currAns ==
+                                            correctAnswer
+
+                                answeredHistoryIds
+                                    .add(
+                                        historyId
+                                    )
+
+                                _currQuestionState.value =
+                                    _currQuestionState
+                                        .value
+                                        .copy(
+
+                                            isEnabled =
+                                                false,
+
+                                            currQuestion =
+                                                question.copy(
+                                                    correctAnswer =
+                                                        correctAnswer
+                                                ),
+
+                                            correctCount =
+                                                if (isCorrect) {
+                                                    current.correctCount + 1
+                                                } else {
+                                                    current.correctCount
+                                                },
+
+                                            errorMessage =
+                                                null
+                                        )
+                            },
+
+                            onFailure = {
+                                    error ->
+
+                                Log.e(
+                                    "QuestionViewModel",
+                                    "Failed to submit answer",
+                                    error
+                                )
+
+                                _currQuestionState.value =
+                                    _currQuestionState
+                                        .value
+                                        .copy(
+                                            errorMessage =
+                                                "Unable to submit your answer. " +
+                                                        "Please try again."
+                                        )
+                            }
                         )
+                    }
 
                     return
                 }
@@ -252,7 +334,8 @@ class QuestionViewModel @Inject constructor(
                     current.questionNo ?: 0
 
                 val totalQuestions =
-                    _questionsList.value
+                    _questionsList
+                        .value
                         .list
                         .size
 
@@ -262,6 +345,7 @@ class QuestionViewModel @Inject constructor(
 
                     _currQuestionState.value =
                         current.copy(
+
                             questionNo =
                                 currentQNo + 1,
 
@@ -272,7 +356,9 @@ class QuestionViewModel @Inject constructor(
 
                             isEnabled = true,
 
-                            currAns = ""
+                            currAns = "",
+
+                            errorMessage = null
                         )
 
                 } else {
@@ -285,7 +371,8 @@ class QuestionViewModel @Inject constructor(
 
                     _questionsList.value =
                         _questionsList.value.copy(
-                            tempPoints = finalScore
+                            tempPoints =
+                                finalScore
                         )
 
                     viewModelScope.launch {
@@ -310,19 +397,77 @@ class QuestionViewModel @Inject constructor(
                                 )
                         }
 
-                        val saveResult = quizResultRepository.saveQuizResult(
-                            category = category,
-                            questionTypes = questionTypes,
-                            questionCount = totalQuestions,
-                            correctCount = finalScore
-                        )
+                        if (
+                            answeredHistoryIds.size
+                            != totalQuestions
+                        ) {
 
-                        if (saveResult.isFailure) {
+                            _currQuestionState.value =
+                                _currQuestionState
+                                    .value
+                                    .copy(
+                                        errorMessage =
+                                            "Some answers were not saved. " +
+                                                    "Please try again."
+                                    )
+
+                            return@launch
+                        }
+
+                        val quizToken =
+                            _questionsList
+                                .value
+                                .list
+                                .firstOrNull()
+                                ?.quizToken
+
+                        if (
+                            quizToken.isNullOrBlank()
+                        ) {
+
+                            _currQuestionState.value =
+                                _currQuestionState
+                                    .value
+                                    .copy(
+                                        errorMessage =
+                                            "Quiz session is invalid. " +
+                                                    "Please restart the quiz."
+                                    )
+
+                            return@launch
+                        }
+
+                        val saveResult =
+                            quizResultRepository
+                                .saveQuizResult(
+                                    quizToken =
+                                        quizToken,
+
+                                    historyIds =
+                                        answeredHistoryIds
+                                            .toList()
+                                )
+
+                        if (
+                            saveResult.isFailure
+                        ) {
+
                             Log.e(
                                 "QuestionViewModel",
                                 "Failed to save quiz result",
                                 saveResult.exceptionOrNull()
                             )
+
+                            _currQuestionState.value =
+                                _currQuestionState
+                                    .value
+                                    .copy(
+                                        errorMessage =
+                                            "Unable to save the quiz result. " +
+                                                    "Please try again."
+                                    )
+
+                            return@launch
                         }
 
                         event.navHostController
@@ -352,26 +497,33 @@ class QuestionViewModel @Inject constructor(
                 ) {
 
                     _currQuestionState.value =
-                        _currQuestionState.value.copy(
-                            currAns = event.ans
-                        )
+                        _currQuestionState
+                            .value
+                            .copy(
+                                currAns =
+                                    event.ans
+                            )
                 }
             }
 
             is QuestionEvent.OpenDialog -> {
 
                 _dialogState.value =
-                    _dialogState.value.copy(
-                        state = true
-                    )
+                    _dialogState
+                        .value
+                        .copy(
+                            state = true
+                        )
             }
 
             is QuestionEvent.CloseDialog -> {
 
                 _dialogState.value =
-                    _dialogState.value.copy(
-                        state = false
-                    )
+                    _dialogState
+                        .value
+                        .copy(
+                            state = false
+                        )
             }
         }
     }

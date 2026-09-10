@@ -30,7 +30,10 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
-private val Context.quizellaDataStore: DataStore<Preferences> by preferencesDataStore(name = "quizella_prefs")
+private val Context.quizellaDataStore:
+        DataStore<Preferences> by preferencesDataStore(
+    name = "quizella_prefs"
+)
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -38,53 +41,90 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(): HttpClient = HttpClient {
-        install(JsonFeature) {
-            serializer = KotlinxSerializer(
-                Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                    encodeDefaults = true
-                }
-            )
+    fun provideHttpClient(): HttpClient =
+        HttpClient {
+
+            install(JsonFeature) {
+
+                serializer =
+                    KotlinxSerializer(
+                        Json {
+
+                            ignoreUnknownKeys =
+                                true
+
+                            isLenient =
+                                true
+
+                            encodeDefaults =
+                                true
+                        }
+                    )
+            }
         }
-    }
 
     @Provides
     @Singleton
-    fun provideTriviaService(client: HttpClient): TriviaService = TriviaService(client)
+    fun provideTriviaService(
+        client: HttpClient
+    ): TriviaService =
+        TriviaService(client)
 
     @Provides
     @Singleton
-    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+    fun provideDataStore(
+        @ApplicationContext context: Context
+    ): DataStore<Preferences> =
         context.quizellaDataStore
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): QuestionsCacheDB =
-        Room.databaseBuilder(context, QuestionsCacheDB::class.java, "questions_cache_db")
+    fun provideDatabase(
+        @ApplicationContext context: Context
+    ): QuestionsCacheDB =
+        Room.databaseBuilder(
+            context,
+            QuestionsCacheDB::class.java,
+            "questions_cache_db"
+        )
             .fallbackToDestructiveMigration()
             .build()
 
     @Provides
     @Singleton
-    fun provideQuestionDao(database: QuestionsCacheDB): QuestionCacheDao = database.questionDao()
+    fun provideQuestionDao(
+        database: QuestionsCacheDB
+    ): QuestionCacheDao =
+        database.questionDao()
 
     @Provides
     @Singleton
-    fun provideUserDao(database: QuestionsCacheDB): UserDao = database.userDao()
+    fun provideUserDao(
+        database: QuestionsCacheDB
+    ): UserDao =
+        database.userDao()
 
     @Provides
     @Singleton
     fun provideQuestionsRepository(
         questionDao: QuestionCacheDao,
-        triviaService: TriviaService
-    ): QuestionsRepository = QuestionsRepositoryImpl(questionDao, triviaService)
+        triviaService: TriviaService,
+        authRepository: AuthRepository
+    ): QuestionsRepository =
+        QuestionsRepositoryImpl(
+            questionDao,
+            triviaService,
+            authRepository
+        )
 
     @Provides
     @Singleton
-    fun provideCategoryRepository(triviaService: TriviaService): CategoryRepository =
-        CategoryRepositoryImpl(triviaService)
+    fun provideCategoryRepository(
+        triviaService: TriviaService
+    ): CategoryRepository =
+        CategoryRepositoryImpl(
+            triviaService
+        )
 
     @Provides
     @Singleton
@@ -92,11 +132,16 @@ object AppModule {
         triviaService: TriviaService,
         authRepository: AuthRepository
     ): QuizResultRepository =
-        QuizResultRepositoryImpl(triviaService, authRepository)
+        QuizResultRepositoryImpl(
+            triviaService,
+            authRepository
+        )
 
     @Provides
     @Singleton
-    fun provideScoreRepository(dataStore: DataStore<Preferences>): ScoreRepository =
+    fun provideScoreRepository(
+        dataStore: DataStore<Preferences>
+    ): ScoreRepository =
         ScoreRepositoryImpl(dataStore)
 
     @Provides
@@ -104,5 +149,9 @@ object AppModule {
     fun provideAuthRepository(
         triviaService: TriviaService,
         @ApplicationContext context: Context
-    ): AuthRepository = AuthRepositoryImpl(context = context, triviaService = triviaService)
+    ): AuthRepository =
+        AuthRepositoryImpl(
+            context = context,
+            triviaService = triviaService
+        )
 }
