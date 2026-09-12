@@ -41,8 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.quizella.presentation.util.Screen
 import com.example.quizella.ui.theme.MinimalPrimary
@@ -56,74 +56,51 @@ fun MainScreen(
     navHostController: NavController,
     onLogout: () -> Unit,
     themeMode: ThemeMode,
-    onThemeChange: (ThemeMode) -> Unit,
-    viewModel: MainViewModel = hiltViewModel()
+    onThemeChange: (ThemeMode) -> Unit
 ) {
 
-    val points by viewModel.points
-
-    var showThemeDialog by
-    remember {
+    var showThemeDialog by remember {
         mutableStateOf(false)
     }
 
-    var showLogoutDialog by
-    remember {
+    var showLogoutDialog by remember {
         mutableStateOf(false)
     }
 
     Scaffold(
-
-        backgroundColor =
-            MaterialTheme.colors.background,
+        backgroundColor = MaterialTheme.colors.background,
 
         topBar = {
-
             TopAppBar(
-
-                backgroundColor =
-                    MaterialTheme.colors.surface,
-
+                backgroundColor = MaterialTheme.colors.surface,
                 elevation = 0.dp,
 
                 title = {
-
                     Column {
-
                         Text(
                             text = "Quizella",
-                            fontWeight =
-                                FontWeight.Bold
+                            fontWeight = FontWeight.Bold
                         )
 
                         Text(
-                            text =
-                                "Test your knowledge",
-
-                            style =
-                                MaterialTheme.typography.caption,
-
-                            color =
-                                MaterialTheme.colors.onSurface
-                                    .copy(alpha = 0.55f)
+                            text = "Test your knowledge",
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(
+                                alpha = 0.55f
+                            )
                         )
                     }
                 },
 
                 actions = {
-
                     IconButton(
                         onClick = {
                             showThemeDialog = true
                         }
                     ) {
-
                         Icon(
-                            imageVector =
-                                Icons.Outlined.Brightness6,
-
-                            contentDescription =
-                                "Change theme"
+                            imageVector = Icons.Outlined.Brightness6,
+                            contentDescription = "Change theme"
                         )
                     }
 
@@ -132,437 +109,226 @@ fun MainScreen(
                             showLogoutDialog = true
                         }
                     ) {
-
                         Icon(
-                            imageVector =
-                                Icons.Outlined.ExitToApp,
-
-                            contentDescription =
-                                "Logout"
+                            imageVector = Icons.Outlined.ExitToApp,
+                            contentDescription = "Logout"
                         )
                     }
                 }
             )
         }
-
     ) { paddingValues ->
 
         Column(
-
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    MaterialTheme.colors.background
-                )
+                .background(MaterialTheme.colors.background)
                 .padding(paddingValues)
                 .padding(
                     horizontal = 20.dp,
-                    vertical = 18.dp
+                    vertical = 20.dp
                 ),
-
-            horizontalAlignment =
-                Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
 
-            // ==================================================
-            // HEADER
-            // ==================================================
+            Spacer(
+                modifier = Modifier.height(28.dp)
+            )
 
-            Row(
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-                modifier =
-                    Modifier.fillMaxWidth(),
+                Text(
+                    text = "Ready for a challenge?",
+                    style = MaterialTheme.typography.h4,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
 
-                verticalAlignment =
-                    Alignment.CenterVertically
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                Text(
+                    text = "Put your knowledge to the test\nand see how well you can do.",
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onSurface.copy(
+                        alpha = 0.6f
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.height(34.dp)
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.colors.primary,
+                shape = MaterialTheme.shapes.large,
+                elevation = 0.dp
             ) {
 
                 Column(
-                    modifier =
-                        Modifier.weight(1f)
+                    modifier = Modifier.padding(
+                        horizontal = 24.dp,
+                        vertical = 28.dp
+                    ),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     Text(
-                        text =
-                            "Ready for a challenge?",
-
-                        style =
-                            MaterialTheme.typography.h5
+                        text = "Start a new quiz",
+                        style = MaterialTheme.typography.h5,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.onPrimary,
+                        textAlign = TextAlign.Center
                     )
 
                     Spacer(
-                        modifier =
-                            Modifier.height(4.dp)
+                        modifier = Modifier.height(8.dp)
                     )
 
                     Text(
-                        text =
-                            "Your current best score",
-
-                        style =
-                            MaterialTheme.typography.body2,
-
-                        color =
-                            MaterialTheme.colors.onBackground
-                                .copy(alpha = 0.6f)
-                    )
-                }
-
-                Box(
-
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .background(
-                            MaterialTheme.colors.primary
-                                .copy(alpha = 0.12f)
+                        text = "Challenge yourself and improve your score.",
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onPrimary.copy(
+                            alpha = 0.78f
                         ),
-
-                    contentAlignment =
-                        Alignment.Center
-                ) {
-
-                    Text(
-                        text =
-                            points.toString(),
-
-                        style =
-                            MaterialTheme.typography.h6,
-
-                        color =
-                            MaterialTheme.colors.primary,
-
-                        fontWeight =
-                            FontWeight.Bold
-                    )
-                }
-            }
-
-            Spacer(
-                modifier =
-                    Modifier.height(22.dp)
-            )
-
-            // ==================================================
-            // PROGRESS CARD
-            // ==================================================
-
-            Card(
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                backgroundColor =
-                    MaterialTheme.colors.surface,
-
-                shape =
-                    MaterialTheme.shapes.large,
-
-                elevation =
-                    2.dp
-
-            ) {
-
-                Column(
-
-                    modifier =
-                        Modifier.padding(20.dp)
-                ) {
-
-                    Text(
-                        text =
-                            "Your progress",
-
-                        style =
-                            MaterialTheme.typography.h6
+                        textAlign = TextAlign.Center
                     )
 
                     Spacer(
-                        modifier =
-                            Modifier.height(12.dp)
-                    )
-
-                    Row(
-
-                        modifier =
-                            Modifier.fillMaxWidth(),
-
-                        horizontalArrangement =
-                            Arrangement.SpaceBetween
-                    ) {
-
-                        ProgressStat(
-                            label = "High score",
-                            value = points.toString()
-                        )
-
-                        ProgressStat(
-                            label = "Questions",
-                            value = "10"
-                        )
-
-                        ProgressStat(
-                            label = "Theme",
-
-                            value =
-                                if (
-                                    themeMode ==
-                                    ThemeMode.NATURE_GREEN
-                                ) {
-                                    "Nature"
-                                } else {
-                                    "Light"
-                                }
-                        )
-                    }
-                }
-            }
-
-            Spacer(
-                modifier =
-                    Modifier.height(22.dp)
-            )
-
-            // ==================================================
-            // START QUIZ
-            // ==================================================
-
-            Card(
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                backgroundColor =
-                    MaterialTheme.colors.primary,
-
-                shape =
-                    MaterialTheme.shapes.large,
-
-                elevation =
-                    0.dp
-
-            ) {
-
-                Column(
-
-                    modifier =
-                        Modifier.padding(22.dp)
-                ) {
-
-                    Text(
-                        text =
-                            "Start a new quiz",
-
-                        style =
-                            MaterialTheme.typography.h6,
-
-                        color =
-                            MaterialTheme.colors.onPrimary
-                    )
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(6.dp)
-                    )
-
-                    Text(
-                        text =
-                            "Challenge yourself and improve your score.",
-
-                        style =
-                            MaterialTheme.typography.body2,
-
-                        color =
-                            MaterialTheme.colors.onPrimary
-                                .copy(alpha = 0.78f)
-                    )
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(18.dp)
+                        modifier = Modifier.height(22.dp)
                     )
 
                     Button(
-
                         onClick = {
-
                             navHostController.navigate(
                                 Screen.QuizSetupScreen.route
                             )
                         },
-
-                        modifier =
-                            Modifier.fillMaxWidth(),
-
-                        colors =
-                            ButtonDefaults.buttonColors(
-
-                                backgroundColor =
-                                    MaterialTheme.colors.surface,
-
-                                contentColor =
-                                    MaterialTheme.colors.primary
-                            ),
-
-                        shape =
-                            MaterialTheme.shapes.medium
-
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colors.surface,
+                            contentColor = MaterialTheme.colors.primary
+                        ),
+                        shape = MaterialTheme.shapes.medium
                     ) {
-
                         Text(
-                            text =
-                                "Start Quiz"
+                            text = "Start Quiz",
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
             }
 
             Spacer(
-                modifier =
-                    Modifier.height(18.dp)
+                modifier = Modifier.height(16.dp)
             )
 
             OutlinedButton(
                 onClick = {
-                    navHostController.navigate(Screen.ResultsScreen.route)
+                    navHostController.navigate(
+                        Screen.ResultsScreen.route
+                    )
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text("Quiz History")
             }
 
             Spacer(
-                modifier =
-                    Modifier.height(10.dp)
+                modifier = Modifier.height(10.dp)
             )
 
-            // ==================================================
-            // THEME BUTTON
-            // ==================================================
-
-            OutlinedButton(
-
-                onClick = {
-                    showThemeDialog = true
-                },
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                shape =
-                    MaterialTheme.shapes.medium
-
+            Row(
+                modifier = Modifier.fillMaxWidth()
             ) {
 
-                Icon(
-                    imageVector =
-                        Icons.Outlined.Brightness6,
+                OutlinedButton(
+                    onClick = {
+                        showThemeDialog = true
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = MaterialTheme.shapes.medium
+                ) {
 
-                    contentDescription =
-                        null
-                )
+                    Icon(
+                        imageVector = Icons.Outlined.Brightness6,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
 
-                Spacer(
-                    modifier =
-                        Modifier.width(8.dp)
-                )
+                    Spacer(
+                        modifier = Modifier.width(6.dp)
+                    )
 
-                Text(
-
-                    text =
-                        if (
-                            themeMode ==
-                            ThemeMode.NATURE_GREEN
-                        ) {
-
-                            "Nature Green theme"
-
-                        } else {
-
-                            "Minimal Light theme"
-                        }
-                )
-            }
-
-            Spacer(
-                modifier =
-                    Modifier.height(10.dp)
-            )
-
-            // ==================================================
-            // LOGOUT
-            // ==================================================
-
-            OutlinedButton(
-
-                onClick = {
-                    showLogoutDialog = true
-                },
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                shape =
-                    MaterialTheme.shapes.medium
-
-            ) {
-
-                Icon(
-                    imageVector =
-                        Icons.Outlined.ExitToApp,
-
-                    contentDescription =
-                        null
-                )
+                    Text("Theme")
+                }
 
                 Spacer(
-                    modifier =
-                        Modifier.width(8.dp)
+                    modifier = Modifier.width(10.dp)
                 )
 
-                Text("Logout")
+                OutlinedButton(
+                    onClick = {
+                        showLogoutDialog = true
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Outlined.ExitToApp,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+
+                    Spacer(
+                        modifier = Modifier.width(6.dp)
+                    )
+
+                    Text("Logout")
+                }
             }
         }
     }
 
-    // ==========================================================
-    // THEME DIALOG
-    // ==========================================================
-
     if (showThemeDialog) {
 
         ThemePickerDialog(
-
-            selectedTheme =
-                themeMode,
+            selectedTheme = themeMode,
 
             onThemeSelected = {
-
                 onThemeChange(it)
-
-                showThemeDialog =
-                    false
+                showThemeDialog = false
             },
 
             onDismiss = {
-                showThemeDialog =
-                    false
+                showThemeDialog = false
             }
         )
     }
 
-    // ==========================================================
-    // LOGOUT DIALOG
-    // ==========================================================
-
     if (showLogoutDialog) {
 
         AlertDialog(
-
             onDismissRequest = {
-                showLogoutDialog =
-                    false
+                showLogoutDialog = false
             },
 
             title = {
@@ -570,79 +336,29 @@ fun MainScreen(
             },
 
             text = {
-                Text(
-                    "Are you sure you want to logout?"
-                )
+                Text("Are you sure you want to logout?")
             },
 
             confirmButton = {
-
                 Button(
-
                     onClick = {
-
-                        showLogoutDialog =
-                            false
-
+                        showLogoutDialog = false
                         onLogout()
                     }
-
                 ) {
-
                     Text("Logout")
                 }
             },
 
             dismissButton = {
-
                 OutlinedButton(
-
                     onClick = {
-                        showLogoutDialog =
-                            false
+                        showLogoutDialog = false
                     }
-
                 ) {
-
                     Text("Cancel")
                 }
             }
-        )
-    }
-}
-
-@Composable
-private fun ProgressStat(
-    label: String,
-    value: String
-) {
-
-    Column {
-
-        Text(
-            text =
-                value,
-
-            style =
-                MaterialTheme.typography.h6,
-
-            color =
-                MaterialTheme.colors.primary,
-
-            fontWeight =
-                FontWeight.Bold
-        )
-
-        Text(
-            text =
-                label,
-
-            style =
-                MaterialTheme.typography.caption,
-
-            color =
-                MaterialTheme.colors.onSurface
-                    .copy(alpha = 0.55f)
         )
     }
 }
@@ -655,48 +371,26 @@ private fun ThemePickerDialog(
 ) {
 
     AlertDialog(
-
-        onDismissRequest =
-            onDismiss,
+        onDismissRequest = onDismiss,
 
         title = {
-
             Text(
-                text =
-                    "Choose appearance",
-
-                style =
-                    MaterialTheme.typography.h6
+                text = "Choose appearance",
+                style = MaterialTheme.typography.h6
             )
         },
 
         text = {
-
             Column {
 
                 ThemeOption(
-
-                    title =
-                        "Minimal Light",
-
-                    subtitle =
-                        "Clean white and blue",
-
-                    themeMode =
-                        ThemeMode.MINIMAL_LIGHT,
-
-                    selected =
-                        selectedTheme ==
-                                ThemeMode.MINIMAL_LIGHT,
-
-                    accent =
-                        MinimalPrimary,
-
-                    preview =
-                        MinimalSurfaceAlt,
-
+                    title = "Minimal Light",
+                    subtitle = "Clean white and blue",
+                    themeMode = ThemeMode.MINIMAL_LIGHT,
+                    selected = selectedTheme == ThemeMode.MINIMAL_LIGHT,
+                    accent = MinimalPrimary,
+                    preview = MinimalSurfaceAlt,
                     onClick = {
-
                         onThemeSelected(
                             ThemeMode.MINIMAL_LIGHT
                         )
@@ -704,33 +398,17 @@ private fun ThemePickerDialog(
                 )
 
                 Spacer(
-                    modifier =
-                        Modifier.height(10.dp)
+                    modifier = Modifier.height(10.dp)
                 )
 
                 ThemeOption(
-
-                    title =
-                        "Nature Green",
-
-                    subtitle =
-                        "Warm cream and natural green",
-
-                    themeMode =
-                        ThemeMode.NATURE_GREEN,
-
-                    selected =
-                        selectedTheme ==
-                                ThemeMode.NATURE_GREEN,
-
-                    accent =
-                        NaturePrimary,
-
-                    preview =
-                        NatureSurfaceAlt,
-
+                    title = "Nature Green",
+                    subtitle = "Warm cream and natural green",
+                    themeMode = ThemeMode.NATURE_GREEN,
+                    selected = selectedTheme == ThemeMode.NATURE_GREEN,
+                    accent = NaturePrimary,
+                    preview = NatureSurfaceAlt,
                     onClick = {
-
                         onThemeSelected(
                             ThemeMode.NATURE_GREEN
                         )
@@ -745,135 +423,88 @@ private fun ThemePickerDialog(
 
 @Composable
 private fun ThemeOption(
-
     title: String,
-
     subtitle: String,
-
     themeMode: ThemeMode,
-
     selected: Boolean,
-
     accent: Color,
-
     preview: Color,
-
     onClick: () -> Unit
-
 ) {
 
     Row(
-
         modifier = Modifier
             .fillMaxWidth()
-            .clip(
-                MaterialTheme.shapes.medium
-            )
+            .clip(MaterialTheme.shapes.medium)
             .background(preview)
             .border(
-
-                width =
-                    if (selected) {
-                        2.dp
-                    } else {
-                        1.dp
-                    },
-
-                color =
-                    if (selected) {
-                        accent
-                    } else {
-                        MaterialTheme.colors.onSurface
-                            .copy(alpha = 0.12f)
-                    },
-
-                shape =
-                    MaterialTheme.shapes.medium
+                width = if (selected) 2.dp else 1.dp,
+                color = if (selected) {
+                    accent
+                } else {
+                    MaterialTheme.colors.onSurface.copy(
+                        alpha = 0.12f
+                    )
+                },
+                shape = MaterialTheme.shapes.medium
             )
             .clickable(
                 onClick = onClick
             )
             .padding(12.dp),
 
-        verticalAlignment =
-            Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
         Box(
-
             modifier = Modifier
                 .size(42.dp)
                 .clip(CircleShape)
                 .background(accent),
-
-            contentAlignment =
-                Alignment.Center
+            contentAlignment = Alignment.Center
         ) {
 
             Text(
-
-                text =
-                    if (
-                        themeMode ==
-                        ThemeMode.MINIMAL_LIGHT
-                    ) {
-                        "M"
-                    } else {
-                        "N"
-                    },
-
-                color =
-                    Color.White,
-
-                fontWeight =
-                    FontWeight.Bold
+                text = if (
+                    themeMode == ThemeMode.MINIMAL_LIGHT
+                ) {
+                    "M"
+                } else {
+                    "N"
+                },
+                color = Color.White,
+                fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(
-            modifier =
-                Modifier.width(12.dp)
+            modifier = Modifier.width(12.dp)
         )
 
         Column(
-            modifier =
-                Modifier.weight(1f)
+            modifier = Modifier.weight(1f)
         ) {
 
             Text(
-                text =
-                    title,
-
-                fontWeight =
-                    FontWeight.SemiBold
+                text = title,
+                fontWeight = FontWeight.SemiBold
             )
 
             Text(
-                text =
-                    subtitle,
-
-                style =
-                    MaterialTheme.typography.caption,
-
-                color =
-                    MaterialTheme.colors.onSurface
-                        .copy(alpha = 0.6f)
+                text = subtitle,
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.onSurface.copy(
+                    alpha = 0.6f
+                )
             )
         }
 
         RadioButton(
-
-            selected =
-                selected,
-
-            onClick =
-                onClick,
-
-            colors =
-                RadioButtonDefaults.colors(
-                    selectedColor =
-                        accent
-                )
+            selected = selected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = accent
+            )
         )
     }
 }

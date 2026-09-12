@@ -129,7 +129,7 @@ fun RegisterScreen(
             Text(
 
                 text =
-                    "Join Quizella and start testing your knowledge.",
+                    "Join QuizApp and start testing your knowledge.",
 
                 style =
                     MaterialTheme.typography.body2,
