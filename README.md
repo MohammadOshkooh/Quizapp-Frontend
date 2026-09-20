@@ -1,3 +1,471 @@
+# Quizella Android 🎯
+
+Quizella is an interactive Android quiz application that allows users to create and take customized quizzes, answer different types of questions, and review their previous quiz results.
+
+The Android application was originally based on the open-source Quizella project and was significantly modified and extended to work with the project's custom backend API.
+
+## ✨ Features
+
+- 🔐 User registration and login
+- 🔑 JWT authentication
+- 🧠 Custom quiz configuration
+- 📚 Category selection
+- 📝 Text questions
+- 🔊 Audio questions
+- 🖼️ Image questions
+- 🎯 Configurable question count
+- ✅ Server-side answer validation
+- 📊 Quiz score and results
+- 📜 Quiz history
+- 💾 Local question caching
+- 🌐 REST API communication
+- 🌓 Theme support
+- 🧭 Compose Navigation
+- 💉 Dependency Injection with Hilt
+- 🧪 Unit and instrumentation test structure
+
+## 📱 Screenshots
+
+> Place the screenshots from the project archive in `docs/screenshots/`.
+
+### Authentication
+
+<p align="center">
+  <img src="docs/screenshots/login.png" width="220">
+  <img src="docs/screenshots/register.png" width="220">
+</p>
+
+### Main Screen & Quiz Setup
+
+<p align="center">
+  <img src="docs/screenshots/main.png" width="220">
+  <img src="docs/screenshots/1.png" width="220">
+</p>
+
+### Quiz
+
+<p align="center">
+  <img src="docs/screenshots/2.png" width="220">
+  <img src="docs/screenshots/3.png" width="220">
+</p>
+
+### Quiz History
+
+<p align="center">
+  <img src="docs/screenshots/history.png" width="220">
+</p>
+
+## 🏗️ Architecture
+
+The application follows an **MVVM-based architecture** with separate data, domain, and presentation layers.
+
+```text
+┌─────────────────────────────┐
+│        Presentation         │
+│  Compose UI + ViewModels    │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│           Domain            │
+│ Models + Repository APIs    │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│            Data             │
+│ Repositories                │
+│ ├── Remote API              │
+│ └── Local Room Database     │
+└──────────────┬──────────────┘
+               │
+        ┌──────┴──────┐
+        ▼             ▼
+   Backend API     Room DB
+```
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| **Kotlin** | Android programming language |
+| **Jetpack Compose** | Declarative UI |
+| **MVVM** | Application architecture |
+| **Hilt** | Dependency Injection |
+| **Ktor Client** | HTTP networking |
+| **Room** | Local database / cache |
+| **DataStore** | Local preferences and authentication state |
+| **Navigation Compose** | Screen navigation |
+| **Kotlin Coroutines** | Asynchronous operations |
+| **Material** | UI components |
+| **JUnit** | Unit testing |
+| **AndroidX Test** | Instrumentation testing |
+
+## 🧩 Project Structure
+
+```text
+app/src/main/java/com/example/quizella/
+│
+├── common/
+│   └── Constants.kt
+│
+├── data/
+│   ├── data_source/
+│   │   ├── local/
+│   │   │   ├── Converters.kt
+│   │   │   ├── QuestionCacheDao.kt
+│   │   │   ├── QuestionsCacheDB.kt
+│   │   │   └── UserDao.kt
+│   │   │
+│   │   └── remote/
+│   │       ├── TriviaService.kt
+│   │       └── dto/
+│   │
+│   └── repository/
+│       ├── AuthRepositoryImpl.kt
+│       ├── CategoriesRepositoryImpl.kt
+│       ├── QuestionsRepositoryImpl.kt
+│       ├── QuizResultRepositoryImpl.kt
+│       └── ScoreRepositoryImpl.kt
+│
+├── domain/
+│   ├── model/
+│   │   ├── Category.kt
+│   │   ├── Question.kt
+│   │   ├── QuizConfig.kt
+│   │   ├── QuizResult.kt
+│   │   └── User.kt
+│   │
+│   └── repository/
+│
+├── di/
+│   └── AppModule.kt
+│
+├── presentation/
+│   ├── auth/
+│   ├── finish/
+│   ├── main/
+│   ├── questions/
+│   ├── quiz/
+│   ├── results/
+│   ├── common/
+│   ├── theme/
+│   └── util/
+│
+└── ui/
+    └── theme/
+```
+
+## 🔄 Application Flow
+
+```text
+Register / Login
+       │
+       ▼
+ Main Screen
+       │
+       ▼
+  Quiz Setup
+       │
+       ├── Category
+       ├── Question Type
+       └── Question Count
+       │
+       ▼
+     Quiz
+       │
+       ▼
+Answer Validation
+       │
+       ▼
+ Quiz Result
+       │
+       ▼
+ Quiz History
+```
+
+## 🎮 Quiz Configuration
+
+Before starting a quiz, users can configure:
+
+### Category
+
+Categories are retrieved from the backend and presented to the user for selection.
+
+### Question Types
+
+The application supports:
+
+```text
+Text
+Audio
+Image
+```
+
+Users can select the question/media types used in the quiz.
+
+### Number of Questions
+
+The quiz configuration allows the user to select the number of questions before starting.
+
+## 🌐 Backend Communication
+
+The Android application communicates with the Quizella backend through `TriviaService`.
+
+The API is used for:
+
+```text
+Authentication
+Categories
+Questions
+Answer validation
+Quiz results
+Quiz history
+```
+
+The API base URL is configured in:
+
+```text
+common/Constants.kt
+```
+
+For the Android emulator, the backend running on the host machine can be accessed using:
+
+```kotlin
+const val API_BASE_URL = "http://10.0.2.2:8000"
+```
+
+For a physical device, replace the address with the local IP address of the machine running the backend.
+
+## 🔐 Authentication
+
+After login, the backend returns a JWT access token.
+
+The Android application stores authentication state using **DataStore**.
+
+Authenticated requests use:
+
+```http
+Authorization: Bearer <token>
+```
+
+When the user logs out, the locally stored authentication information is cleared.
+
+## 💾 Local Data
+
+The application uses **Room** for local question caching.
+
+```text
+Backend
+   │
+   ▼
+TriviaService
+   │
+   ▼
+QuestionsRepository
+   │
+   ▼
+Room Database
+   │
+   ▼
+ViewModel
+   │
+   ▼
+Jetpack Compose UI
+```
+
+This keeps networking and persistence concerns separate from the UI.
+
+## 🧠 Repository Layer
+
+Repositories provide an abstraction between the presentation/domain layers and the data sources.
+
+```text
+QuestionsRepository
+        │
+        ▼
+QuestionsRepositoryImpl
+        │
+   ┌────┴────┐
+   ▼         ▼
+TriviaService Room DAO
+```
+
+This structure makes the application easier to maintain and test.
+
+## 💉 Dependency Injection
+
+The project uses **Dagger Hilt** for dependency injection.
+
+Hilt provides dependencies such as:
+
+- HTTP client
+- API service
+- Room database
+- DAOs
+- Repositories
+- ViewModels
+
+Main configuration:
+
+```text
+di/AppModule.kt
+```
+
+## 🖥️ Main Screens
+
+### Login
+
+Allows existing users to authenticate.
+
+### Register
+
+Allows new users to create an account.
+
+### Main Screen
+
+Provides access to the main quiz functionality and user actions.
+
+### Quiz Setup
+
+Allows users to configure:
+
+- Category
+- Question/media types
+- Number of questions
+
+### Quiz
+
+Displays questions and possible answers and communicates with the backend for answer validation.
+
+### Results
+
+Displays the result of the completed quiz.
+
+### Quiz History
+
+Displays previous quiz attempts, including information such as:
+
+- Category
+- Score
+- Question count
+- Question types
+- Completion time
+
+## 🎨 UI
+
+The application uses **Jetpack Compose** and Material components.
+
+The frontend was redesigned and extended from the original project with a new quiz flow and additional functionality.
+
+The current UI includes:
+
+- Card-based layouts
+- Material buttons
+- Radio buttons
+- Checkboxes
+- Dropdown selectors
+- Loading indicators
+- Theme support
+- Compose-based responsive layouts
+
+## 🧪 Testing
+
+### Unit Tests
+
+```text
+app/src/test/
+```
+
+### Instrumentation Tests
+
+```text
+app/src/androidTest/
+```
+
+Run unit tests with:
+
+```bash
+./gradlew test
+```
+
+## ⚙️ Requirements
+
+- Android Studio
+- Android SDK
+- Compatible JDK
+- Android emulator or physical Android device
+
+Current Android configuration:
+
+```text
+compileSdk: 33
+minSdk: 24
+targetSdk: 33
+```
+
+## 🚀 Setup
+
+### 1. Clone the repository
+
+```bash
+git clone <YOUR_FRONTEND_REPOSITORY_URL>
+cd Quizella
+```
+
+### 2. Configure the backend URL
+
+Open:
+
+```text
+app/src/main/java/com/example/quizella/common/Constants.kt
+```
+
+Set the backend URL:
+
+```kotlin
+const val API_BASE_URL = "http://10.0.2.2:8000"
+```
+
+### 3. Start the backend
+
+Make sure the Quizella backend is running before launching the Android application.
+
+### 4. Build and run
+
+Open the project in Android Studio and run the `app` configuration.
+
+## 🔗 Backend
+
+This Android application is designed to work with the companion Quizella backend:
+
+```text
+<YOUR_BACKEND_REPOSITORY_URL>
+```
+
+## 🎓 Project Context
+
+Quizella was originally based on an existing Android quiz application.
+
+As part of this bachelor's degree project, the Android application was significantly modified and extended to communicate with a newly developed backend service.
+
+The project work includes:
+
+- Connecting the Android client to the custom backend
+- Implementing authentication
+- Implementing configurable quizzes
+- Server-side answer validation
+- Quiz result persistence
+- Quiz history
+- Text, image, and audio questions
+- Local data persistence and caching
+- UI and user-flow improvements
+
+## 📄 License
+
+This project contains code originally based on the Quizella project by Gautam Hazarika.
+
+Please refer to the included `LICENSE.md` and repository history for applicable licensing information.
 ![GitHub Cards Preview](https://github.com/gautam84/Quizella/blob/master/art/QuizellaMockUp.jpg?raw=true)
 
 # 🧠 Quizella
