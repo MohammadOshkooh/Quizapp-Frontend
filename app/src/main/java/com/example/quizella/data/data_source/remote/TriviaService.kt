@@ -71,14 +71,6 @@ class TriviaService(
                     category
                 )
 
-                /*
-                 * FastAPI receives these as:
-                 *
-                 * media_types=text
-                 * media_types=audio
-                 *
-                 * for example.
-                 */
                 questionTypes.forEach { questionType ->
 
                     parameter(

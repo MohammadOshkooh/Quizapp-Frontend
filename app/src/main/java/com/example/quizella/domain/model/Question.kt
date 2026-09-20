@@ -20,12 +20,9 @@ data class Question(
 
     val question: String,
 
-    // Answer mechanism.
-    // Always multiple_choice.
+
     val type: String,
 
-    // Actual content/media type.
-    // text / audio / image
     val mediaType: String,
 
     val difficulty: String,

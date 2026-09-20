@@ -2,11 +2,6 @@ package com.example.quizella.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ============================================================
-// MINIMAL LIGHT THEME
-// Inspired by UI #2
-// ============================================================
-
 val MinimalPrimary = Color(0xFF2F80ED)
 val MinimalPrimaryDark = Color(0xFF1D5FBF)
 val MinimalSecondary = Color(0xFF56CCF2)
@@ -19,11 +14,6 @@ val MinimalText = Color(0xFF172033)
 val MinimalTextSecondary = Color(0xFF687386)
 val MinimalBorder = Color(0xFFDCE5F0)
 
-
-// ============================================================
-// NATURE GREEN THEME
-// Inspired by UI #4
-// ============================================================
 
 val NaturePrimary = Color(0xFF3E7B45)
 val NaturePrimaryDark = Color(0xFF2D6034)
