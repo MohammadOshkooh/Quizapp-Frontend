@@ -1,6 +1,6 @@
-# Quizella Android 🎯
+# Quizapp Android 🎯
 
-Quizella is an interactive Android quiz application that allows users to create and take customized quizzes, answer different types of questions, and review their previous quiz results.
+Quizapp is an interactive Android quiz application that allows users to create and take customized quizzes, answer different types of questions, and review their previous quiz results.
 
 The Android application was originally based on the open-source Quizella project and was significantly modified and extended to work with the project's custom backend API.
 
@@ -26,33 +26,33 @@ The Android application was originally based on the open-source Quizella project
 
 ## 📱 Screenshots
 
-> Place the screenshots from the project archive in `docs/screenshots/`.
+> Place the screenshots from the project archive in `screenshots/`.
 
 ### Authentication
 
 <p align="center">
-  <img src="docs/screenshots/login.png" width="220">
-  <img src="docs/screenshots/register.png" width="220">
+  <img src="screenshots/login.png" width="220">
+  <img src="screenshots/register.png" width="220">
 </p>
 
 ### Main Screen & Quiz Setup
 
 <p align="center">
-  <img src="docs/screenshots/main.png" width="220">
-  <img src="docs/screenshots/1.png" width="220">
+  <img src="screenshots/main.png" width="220">
+  <img src="screenshots/1.png" width="220">
 </p>
 
 ### Quiz
 
 <p align="center">
-  <img src="docs/screenshots/2.png" width="220">
-  <img src="docs/screenshots/3.png" width="220">
+  <img src="screenshots/2.png" width="220">
+  <img src="screenshots/3.png" width="220">
 </p>
 
 ### Quiz History
 
 <p align="center">
-  <img src="docs/screenshots/history.png" width="220">
+  <img src="screenshots/history.png" width="220">
 </p>
 
 ## 🏗️ Architecture
@@ -210,7 +210,7 @@ The quiz configuration allows the user to select the number of questions before 
 
 ## 🌐 Backend Communication
 
-The Android application communicates with the Quizella backend through `TriviaService`.
+The Android application communicates with the Quizapp backend through `TriviaService`.
 
 The API is used for:
 
@@ -429,7 +429,7 @@ const val API_BASE_URL = "http://10.0.2.2:8000"
 
 ### 3. Start the backend
 
-Make sure the Quizella backend is running before launching the Android application.
+Make sure the Quizapp backend is running before launching the Android application.
 
 ### 4. Build and run
 
@@ -437,7 +437,7 @@ Open the project in Android Studio and run the `app` configuration.
 
 ## 🔗 Backend
 
-This Android application is designed to work with the companion Quizella backend:
+This Android application is designed to work with the companion Quizapp backend:
 
 ```text
 <YOUR_BACKEND_REPOSITORY_URL>
@@ -445,7 +445,7 @@ This Android application is designed to work with the companion Quizella backend
 
 ## 🎓 Project Context
 
-Quizella was originally based on an existing Android quiz application.
+Quizapp was originally based on an existing Android quiz application.
 
 As part of this bachelor's degree project, the Android application was significantly modified and extended to communicate with a newly developed backend service.
 
@@ -468,7 +468,7 @@ This project contains code originally based on the Quizella project by Gautam Ha
 Please refer to the included `LICENSE.md` and repository history for applicable licensing information.
 ![GitHub Cards Preview](https://github.com/gautam84/Quizella/blob/master/art/QuizellaMockUp.jpg?raw=true)
 
-# 🧠 Quizella
+# 🧠 Quizapp
 A quiz app based on MVVM architecture pattern to test your intelligence. Built using Android-Jetpack Compose and Ktor-client to retrieve data from server.
 
 ## Screenshots 📱 
